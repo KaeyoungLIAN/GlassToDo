@@ -1,0 +1,4 @@
+{
+  "name": "glass-todo", "version": "2.0.0", "private": true,
+  "dependencies": { "@tauri-apps/api": "^2.0.0" }
+}
