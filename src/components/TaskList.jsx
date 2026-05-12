@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import TaskCard from "./TaskCard";
 import { t } from "../i18n";
 
-export default function TaskList({ tasks, onToggle, onDelete, onEdit, onPin, onReorder, undoId, undoContent, onUndo, lang, deletingId, completingId }) {
+export default function TaskList({ tasks, onToggle, onDelete, onEdit, onPin, onReorder, undoId, undoContent, onUndo, lang, deletingId, completingId, onTogglePersist }) {
   const moveTask = useCallback((idx, direction) => {
     const targetIdx = idx + direction;
     if (targetIdx < 0 || targetIdx >= tasks.length) return;
@@ -36,7 +36,7 @@ export default function TaskList({ tasks, onToggle, onDelete, onEdit, onPin, onR
         {undoId && (
           <div className="undo-bar">
             <span>{t(lang, "deletePrefix")}: {undoContent}</span>
-            <button className="undo-btn" onClick={onUndo}>Undo</button>
+            <button className="undo-btn" onClick={onUndo}>{t(lang, "undo")}</button>
           </div>
         )}
         {tasks.map((t, i) => (
@@ -55,6 +55,7 @@ export default function TaskList({ tasks, onToggle, onDelete, onEdit, onPin, onR
               isLast={i === tasks.length - 1}
               onMoveUp={() => moveTask(i, -1)}
               onMoveDown={() => moveTask(i, 1)}
+              onTogglePersist={() => onTogglePersist(t.id)}
             />
           </div>
         ))}
