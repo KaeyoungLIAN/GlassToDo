@@ -45,7 +45,7 @@ body {
   border-radius: 12px;
   overflow: hidden;
   /* Fix Windows transparent window drag drift */
-  outline: 1px solid transparent;
+  border: 1px solid transparent;
 }
 
 #root { display: flex; flex-direction: column; flex: 1; min-height: 0 }
