@@ -3,60 +3,12 @@ import TaskCard from "./TaskCard";
 import { t } from "../i18n";
 
 export default function TaskList({ tasks, onToggle, onDelete, onEdit, onPin, onReorder, undoId, undoContent, onUndo, lang, deletingId, completingId }) {
-  const [dragOverIdx, setDragOverIdx] = useState(null);
-  const [dragIdx, setDragIdx] = useState(null);
-
-  const handleDragStart = useCallback((e, idx) => {
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", String(idx));
-    setDragIdx(idx);
-    // Make the drag image semi-transparent
-    if (e.target) {
-      setTimeout(() => {
-        if (e.target) e.target.style.opacity = "0.4";
-      }, 0);
-    }
-  }, []);
-
-  const handleDragEnd = useCallback((e) => {
-    setDragIdx(null);
-    setDragOverIdx(null);
-    if (e.target) e.target.style.opacity = "";
-  }, []);
-
-  const handleDragOver = useCallback((e, idx) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    setDragOverIdx(idx);
-  }, []);
-
-  const handleDragLeave = useCallback(() => {
-    setDragOverIdx(null);
-  }, []);
-
-  const handleDrop = useCallback((e, dropIdx) => {
-    e.preventDefault();
-    setDragOverIdx(null);
-    setDragIdx(null);
-    const srcIdx = parseInt(e.dataTransfer.getData("text/plain"), 10);
-    if (isNaN(srcIdx) || srcIdx === dropIdx) return;
-
+  const moveTask = useCallback((idx, direction) => {
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= tasks.length) return;
     const ids = tasks.map((t) => t.id);
-    const [moved] = ids.splice(srcIdx, 1);
-    ids.splice(dropIdx, 0, moved);
+    [ids[idx], ids[targetIdx]] = [ids[targetIdx], ids[idx]];
     onReorder(ids);
-  }, [tasks, onReorder]);
-
-  const handleKeyDown = useCallback((e, idx) => {
-    if (e.key === "ArrowUp" && idx > 0) {
-      const ids = tasks.map((t) => t.id);
-      [ids[idx - 1], ids[idx]] = [ids[idx], ids[idx - 1]];
-      onReorder(ids);
-    } else if (e.key === "ArrowDown" && idx < tasks.length - 1) {
-      const ids = tasks.map((t) => t.id);
-      [ids[idx], ids[idx + 1]] = [ids[idx + 1], ids[idx]];
-      onReorder(ids);
-    }
   }, [tasks, onReorder]);
 
   if (!tasks.length) {
@@ -88,16 +40,7 @@ export default function TaskList({ tasks, onToggle, onDelete, onEdit, onPin, onR
           </div>
         )}
         {tasks.map((t, i) => (
-          <div
-            key={t.id}
-            className={"drag-wrapper" + (dragOverIdx === i ? " drag-over" : "") + (dragIdx === i ? " dragging" : "")}
-            draggable={!undoId}
-            onDragStart={(e) => handleDragStart(e, i)}
-            onDragEnd={handleDragEnd}
-            onDragOver={(e) => handleDragOver(e, i)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, i)}
-          >
+          <div key={t.id} className="drag-wrapper">
             <TaskCard
               task={t}
               index={i}
@@ -108,8 +51,10 @@ export default function TaskList({ tasks, onToggle, onDelete, onEdit, onPin, onR
               lang={lang}
               deletingId={deletingId}
               completingId={completingId}
-              onDragStart={(e) => handleDragStart(e, i)}
-              onKeyDown={(e) => handleKeyDown(e, i)}
+              isFirst={i === 0}
+              isLast={i === tasks.length - 1}
+              onMoveUp={() => moveTask(i, -1)}
+              onMoveDown={() => moveTask(i, 1)}
             />
           </div>
         ))}
