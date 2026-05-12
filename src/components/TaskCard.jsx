@@ -3,7 +3,7 @@ import { t } from "../i18n";
 
 const WN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPin, lang, deletingId, completingId, onDragStart, onKeyDown }) {
+export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPin, lang, deletingId, completingId, isFirst, isLast, onMoveUp, onMoveDown }) {
   const isDeleting = task.id === deletingId;
   const isCompleting = task.id === completingId;
   return (
@@ -11,21 +11,30 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
       className={"task-card" + (task.completed ? " completed" : "") + (isDeleting ? " deleting" : "") + (isCompleting ? " completing" : "")}
       style={{ animationDelay: `${index * 40}ms` }}
     >
-      <span
-        className="drag-handle"
-        title="Drag to reorder"
-        onMouseDown={(e) => { if (onDragStart && e.button === 0) onDragStart(e); }}
-        tabIndex={0}
-        role="button"
-        aria-label="Drag to reorder"
-        onKeyDown={onKeyDown}
-      >
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="9" cy="5" r="2" /><circle cx="15" cy="5" r="2" />
-          <circle cx="9" cy="12" r="2" /><circle cx="15" cy="12" r="2" />
-          <circle cx="9" cy="19" r="2" /><circle cx="15" cy="19" r="2" />
-        </svg>
-      </span>
+      <div className="reorder-btns">
+        <button
+          className={"reorder-btn up" + (isFirst ? " disabled" : "")}
+          onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
+          disabled={isFirst}
+          title="Move up"
+          tabIndex={-1}
+        >
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+            <polyline points="18 15 12 9 6 15" />
+          </svg>
+        </button>
+        <button
+          className={"reorder-btn down" + (isLast ? " disabled" : "")}
+          onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
+          disabled={isLast}
+          title="Move down"
+          tabIndex={-1}
+        >
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+      </div>
       <input
         type="checkbox"
         className="task-checkbox"
