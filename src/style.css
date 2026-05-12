@@ -1098,3 +1098,51 @@ body {
   color: var(--text-tertiary);
   margin-top: 22px; /* push to align with value rows */
 }
+
+/* === Archive styles === */
+#archive-btn {
+  position: relative;
+}
+#archive-btn:hover { background: var(--bg-glass-hover); color: var(--text-primary); transform: translateY(-1px) }
+#archive-btn:active { transform: scale(0.92) translateY(0) }
+#archive-btn.active { color: var(--accent); background: var(--accent-dim) }
+
+#archive-badge {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  min-width: 13px;
+  height: 13px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
+}
+
+/* Archived task card */
+.task-card.archived {
+  opacity: 0.55;
+  border-color: rgba(255, 255, 255, 0.03);
+  background: rgba(12, 12, 16, 0.35);
+}
+.task-card.archived:hover {
+  opacity: 0.75;
+  border-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+.task-card.archived:active { transform: scale(0.98) translateY(0) }
+
+.reminder-badge.archived {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-tertiary);
+}
+
+/* Restore button */
+.restore-btn:hover { background: var(--accent-dim); color: var(--accent); transform: translateY(-1px) !important }
+.restore-btn:active { transform: scale(0.85) translateY(0) !important }

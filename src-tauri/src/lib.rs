@@ -19,6 +19,8 @@ pub struct ReminderData {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaskItem {
     pub id: u32, pub content: String, pub completed: bool,
+    #[serde(default)]
+    pub archived: bool,
     pub reminder_type: String, pub reminder_data: ReminderData,
     pub last_reminded: Option<String>, pub created_at: String,
 }
@@ -30,6 +32,7 @@ pub struct TodoData { pub tasks: Vec<TaskItem>, pub next_id: u32 }
 pub struct Settings {
     pub language: String,
     pub data_dir: Option<String>,
+    pub last_archive_date: Option<String>,
 }
 
 impl Default for Settings {
@@ -37,6 +40,7 @@ impl Default for Settings {
         Settings {
             language: "en".to_string(),
             data_dir: None,
+            last_archive_date: None,
         }
     }
 }
@@ -250,6 +254,49 @@ fn check_and_notify(state: State<'_, AppState>, app: AppHandle) -> Result<Vec<St
     Ok(alerts)
 }
 
+#[tauri::command]
+fn run_archive(state: State<'_, AppState>, app: AppHandle) -> Result<Vec<u32>, String> {
+    let s_path = settings_path(&app);
+    let mut settings = load_settings(&s_path);
+    let path = data_path(&app, &settings);
+    let mut data = load_tasks(&path);
+
+    let today = Local::now().format("%Y-%m-%d").to_string();
+    let last = settings.last_archive_date.clone().unwrap_or_default();
+
+    // Skip if already archived today
+    if last == today {
+        return Ok(vec![]);
+    }
+
+    let mut archived_ids = vec![];
+    for task in data.tasks.iter_mut() {
+        if task.archived { continue; }
+        if task.reminder_type == "weekly" { continue; }
+
+        let task_date = if let Some(ref dt) = task.reminder_data.datetime {
+            if dt.len() >= 10 { dt[..10].to_string() } else { String::new() }
+        } else {
+            task.created_at[..10].to_string()
+        };
+
+        if !task_date.is_empty() && task_date < today {
+            task.archived = true;
+            archived_ids.push(task.id);
+        }
+    }
+
+    if !archived_ids.is_empty() {
+        save_tasks(&path, &data)?;
+        *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
+    }
+
+    settings.last_archive_date = Some(today);
+    save_settings(&s_path, &settings)?;
+
+    Ok(archived_ids)
+}
+
 struct AppState { data: Mutex<Vec<TaskItem>> }
 
 pub fn run() {
@@ -285,7 +332,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_tasks, add_task, update_task, delete_task, toggle_complete, check_and_notify,
-            get_settings, update_settings, pick_directory,
+            get_settings, update_settings, pick_directory, run_archive,
         ])
         .run(tauri::generate_context!())
         .expect("error running GlassTodo");

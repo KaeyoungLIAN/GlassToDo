@@ -27,6 +27,7 @@ export default function App() {
   const [deletingId, setDeletingId] = useState(null);
   const [lang, setLang] = useState("en");
   const [showSettings, setShowSettings] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -41,6 +42,16 @@ export default function App() {
     } catch (_) {}
   }, []);
 
+  const runArchive = useCallback(async () => {
+    try {
+      const archived = await invoke("run_archive");
+      if (archived && archived.length > 0) {
+        showToast(t(lang, "archived") + " " + archived.length + " " + t(lang, "tasks"));
+        await loadTasks();
+      }
+    } catch (_) {}
+  }, [showToast, lang, loadTasks]);
+
   // Load settings on mount
   useEffect(() => {
     invoke("get_settings")
@@ -48,19 +59,21 @@ export default function App() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => { loadTasks(); const iv = setInterval(() => invoke("check_and_notify").catch(() => {}), 60000); return () => clearInterval(iv); }, [loadTasks]);
+  useEffect(() => { loadTasks().then(() => runArchive()); const iv = setInterval(() => invoke("check_and_notify").catch(() => {}), 60000); return () => clearInterval(iv); }, [loadTasks, runArchive]);
   useEffect(() => { const cb = () => { if (!document.hidden) loadTasks(); }; document.addEventListener("visibilitychange", cb); return () => document.removeEventListener("visibilitychange", cb); }, [loadTasks]);
 
   // ── filtering ──
   const dateStr = fmt(currentDate);
-  const filtered = tasks
-    .filter(
-      (t) =>
-        t.completed ||
-        t.reminder_type === "weekly" ||
-        (t.reminder_data.datetime && t.reminder_data.datetime.startsWith(dateStr))
-    )
-    .sort((a, b) => a.completed - b.completed);
+  const filtered = showArchive
+    ? tasks.filter((t) => t.archived).sort((a, b) => a.created_at < b.created_at ? 1 : -1)
+    : tasks
+        .filter(
+          (t) =>
+            !t.archived &&
+            (t.completed || t.reminder_type === "weekly" ||
+            (t.reminder_data.datetime && t.reminder_data.datetime.startsWith(dateStr)))
+        )
+        .sort((a, b) => a.completed - b.completed);
 
   // ── CRUD ──
   const addTask = useCallback(
@@ -177,7 +190,12 @@ export default function App() {
 
   return (
     <>
-      <TitleBar onOpenSettings={() => setShowSettings(true)} />
+      <TitleBar
+        onOpenSettings={() => setShowSettings(true)}
+        showArchive={showArchive}
+        onToggleArchive={() => setShowArchive((a) => !a)}
+        archivedCount={tasks.filter((t) => t.archived).length}
+      />
       <DateBar
         dateStr={dateStr}
         weekday={WN[currentDate.getDay()]}
@@ -197,17 +215,27 @@ export default function App() {
         onUndo={cancelDelete}
         lang={lang}
         deletingId={deletingId}
+        showArchive={showArchive}
+        onRestore={async (task) => {
+          try {
+            await invoke("update_task", { task: { ...task, archived: false } });
+            await loadTasks();
+            showToast(t(lang, "restored"));
+          } catch (_) {}
+        }}
       />
-      <BottomPanel
-        editingId={editingId}
-        editText={editText}
-        editRtype={editRtype}
-        editRdata={editRdata}
-        onSave={addTask}
-        onCancelEdit={cancelEdit}
-        dateStr={dateStr}
-        lang={lang}
-      />
+      {!showArchive && (
+        <BottomPanel
+          editingId={editingId}
+          editText={editText}
+          editRtype={editRtype}
+          editRdata={editRdata}
+          onSave={addTask}
+          onCancelEdit={cancelEdit}
+          dateStr={dateStr}
+          lang={lang}
+        />
+      )}
       {toast && <div className="toast">{toast}</div>}
       {showSettings && (
         <SettingsModal
