@@ -1,17 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch }) {
-  const [isPinned, setIsPinned] = useState(false);
-
-  const handlePin = async () => {
-    try {
-      const w = getCurrentWindow();
-      const current = await w.isAlwaysOnTop();
-      await w.setAlwaysOnTop(!current);
-      setIsPinned(!current);
-    } catch (_) {}
-  };
   const handleMin = async () => { try { await getCurrentWindow().minimize(); } catch (_) {} };
   const handleClose = async () => { try { await getCurrentWindow().hide(); } catch (_) {} };
 
@@ -32,13 +22,6 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch })
           <svg className="gear-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="3" />
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-        </button>
-        <button className={"title-btn" + (isPinned ? " active" : "")} id="pin-btn" title="Always on top" onPointerDown={(e) => { e.stopPropagation(); handlePin(); }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2a5 5 0 0 0-5 5c0 3 5 8 5 8s5-5 5-8a5 5 0 0 0-5-5z" />
-            <line x1="12" y1="18" x2="12" y2="22" />
-            <line x1="8" y1="22" x2="16" y2="22" />
           </svg>
         </button>
         <button className="title-btn" id="min-btn" title="Minimize" onPointerDown={(e) => { e.stopPropagation(); handleMin(); }}>
