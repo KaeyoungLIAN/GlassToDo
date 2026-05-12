@@ -34,6 +34,8 @@ const i18n = {
     searchPlaceholder: "Search tasks...",
     yesterday: "Yesterday",
     thisWeek: "This week",
+    save: "Save",
+    saved: "Saved",
   },
   zh: {
     appName: "玻璃待办",
@@ -65,6 +67,8 @@ const i18n = {
     searchPlaceholder: "搜索任务...",
     yesterday: "昨日完成",
     thisWeek: "本周完成",
+    save: "保存",
+    saved: "已保存",
   },
   ja: {
     appName: "グラスTodo",
@@ -96,6 +100,8 @@ const i18n = {
     searchPlaceholder: "タスクを検索...",
     yesterday: "昨日完了",
     thisWeek: "今週完了",
+    save: "保存",
+    saved: "保存完了",
   },
 };
 
