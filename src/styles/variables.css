@@ -34,13 +34,14 @@
 * { margin: 0; padding: 0; box-sizing: border-box }
 
 body {
-  font-family: 'Inter', -apple-system, 'PingFang SC', sans-serif;
+  font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   background: rgba(12, 12, 16, 0.28);
   color: var(--text-primary);
   height: 100dvh;
   display: flex;
   flex-direction: column;
   user-select: none;
-  overflow: hidden;
   letter-spacing: -0.01em;
 }
+
+#root { display: flex; flex-direction: column; flex: 1; min-height: 0 }
