@@ -135,32 +135,37 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
         </div>
       )}
 
-      {/* Scheduled reminder options — always visible when scheduled mode */}
+      {/* Scheduled reminder options — tab-style selector */}
       {taskMode === "scheduled" && (
         <div id="reminder-options">
-          {/* Single-date option: radio + date + time on one row */}
-          <div className="reminder-row">
-            <label className={"radio-label" + (rtype === "once" ? " active" : "")} onClick={() => setRtype("once")}>
-              <input type="radio" name="rtype" value="once" checked={rtype === "once"} readOnly />
-              <span className="radio-dot" />
+          {/* Tab buttons */}
+          <div id="rtype-tabs">
+            <button
+              className={"rtype-tab" + (rtype === "once" ? " active" : "")}
+              onClick={() => setRtype("once")}
+            >
+              <span className="rtype-tab-glow" />
               <span>{t(lang, "oneTime")}</span>
-            </label>
-            {rtype === "once" && (
-              <div className="reminder-pickers">
+            </button>
+            <button
+              className={"rtype-tab" + (rtype === "weekly" ? " active" : "")}
+              onClick={() => setRtype("weekly")}
+            >
+              <span className="rtype-tab-glow" />
+              <span>{t(lang, "weekly")}</span>
+            </button>
+          </div>
+
+          {/* Content panel */}
+          <div id="rtype-panel">
+            {rtype === "once" ? (
+              <div className="rtype-pickers">
                 <DatePicker value={onceDate} onChange={setOnceDate} lang={lang} />
+                <span className="picker-sep">–</span>
                 <TimePicker value={onceTime} onChange={setOnceTime} />
               </div>
-            )}
-          </div>
-          {/* Weekly option: radio + day-picker + time on one row */}
-          <div className="reminder-row">
-            <label className={"radio-label" + (rtype === "weekly" ? " active" : "")} onClick={() => setRtype("weekly")}>
-              <input type="radio" name="rtype" value="weekly" checked={rtype === "weekly"} readOnly />
-              <span className="radio-dot" />
-              <span>{t(lang, "weekly")}</span>
-            </label>
-            {rtype === "weekly" && (
-              <div className="reminder-pickers">
+            ) : (
+              <div className="rtype-pickers">
                 <div id="day-picker">
                   {DAYS.map((d) => (
                     <button
