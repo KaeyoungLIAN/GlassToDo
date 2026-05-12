@@ -23,6 +23,8 @@ pub struct TaskItem {
     #[serde(default)]
     pub pinned: bool,
     #[serde(default)]
+    pub persist: bool,
+    #[serde(default)]
     pub position: u32,
     pub reminder_type: String, pub reminder_data: ReminderData,
     pub last_reminded: Option<String>, pub created_at: String,
@@ -180,7 +182,7 @@ fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
     let position = data.tasks.len() as u32;
     let task = TaskItem {
         id: data.next_id, content, completed: false,
-        pinned: false, position,
+        pinned: false, persist: false, position,
         reminder_type, reminder_data, last_reminded: None,
         created_at: Local::now().format("%Y-%m-%dT%H:%M:%S").to_string(),
     };
