@@ -1,0 +1,107 @@
+#bottom-panel {
+  background: var(--bg-glass); backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-top: 1px solid var(--border-glass);
+  box-shadow: inset 0 1px 0 var(--border-glass-inner), 0 -1px 20px rgba(0,0,0,0.2);
+  padding: 10px 14px 10px; flex-shrink: 0;
+  transition: padding 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+#bottom-panel.has-reminder { padding: 10px 14px 14px }
+
+#input-row { display: flex; gap: 8px }
+
+#task-input {
+  flex: 1; padding: 8px 12px; background: var(--bg-input);
+  border: 1px solid var(--border-glass); border-radius: var(--radius-sm);
+  color: var(--text-primary); font-size: 13.5px; font-family: inherit;
+  outline: none; transition: border-color var(--transition-fast);
+}
+#task-input::placeholder { color: var(--text-muted) }
+#task-input:focus { border-color: rgba(16, 185, 129, 0.4) }
+
+#add-btn {
+  display: flex; align-items: center; gap: 5px; padding: 0 14px;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: var(--radius-sm); font-size: 13px; font-weight: 600;
+  font-family: inherit; cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast), filter var(--transition-fast);
+}
+#add-btn:hover { background: var(--accent-hover); transform: translateY(-1px) }
+#add-btn:active { transform: scale(0.96) translateY(0) }
+#add-btn.editing { background: #047857 }
+#add-btn.editing:hover { filter: brightness(1.2); transform: translateY(-1px) }
+#add-btn.editing:active { transform: scale(0.96) translateY(0) }
+
+/* ── Mode toggle pills ── */
+#mode-toggle { display: flex; gap: 4px; padding: 6px 0 0 }
+
+.mode-pill {
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 10px; background: var(--bg-input);
+  border: 1px solid transparent; border-radius: 6px;
+  color: var(--text-tertiary); font-size: 11px; font-weight: 500;
+  font-family: inherit; cursor: pointer;
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mode-pill:hover { background: var(--bg-glass-hover); color: var(--text-secondary); transform: translateY(-1px) }
+.mode-pill:active { transform: scale(0.96) translateY(0) }
+.mode-pill.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(16, 185, 129, 0.25) }
+.mode-pill svg { flex-shrink: 0 }
+
+/* ── Collapsible reminder ── */
+#reminder-collapse {
+  display: grid; grid-template-rows: 0fr;
+  transition: grid-template-rows 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+#reminder-collapse.open { grid-template-rows: 1fr }
+#reminder-inner { overflow: hidden }
+
+#reminder-summary {
+  display: flex; align-items: center; gap: 5px; width: 100%;
+  padding: 5px 8px; margin-top: 6px; background: var(--bg-input);
+  border: 1px solid transparent; border-radius: var(--radius-sm);
+  color: var(--text-tertiary); font-size: 11px; font-family: inherit;
+  cursor: pointer; transition: background 150ms, border-color 150ms, color 150ms, transform 150ms;
+}
+#reminder-summary:hover { background: var(--bg-glass-hover); border-color: var(--border-glass); color: var(--text-secondary); transform: translateY(-1px) }
+#reminder-summary:active { transform: scale(0.99) translateY(0) }
+#reminder-summary-icon { display: flex; align-items: center; opacity: 0.5; flex-shrink: 0 }
+#reminder-summary-text { flex: 1; text-align: left; letter-spacing: 0.01em }
+#reminder-chevron { flex-shrink: 0; transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1); opacity: 0.4 }
+#reminder-summary.options-open #reminder-chevron { transform: rotate(180deg) }
+
+#reminder-type { display: flex; gap: 16px; padding: 8px 0 6px }
+
+.radio-label {
+  display: flex; align-items: center; gap: 6px; cursor: pointer;
+  font-size: 12px; color: var(--text-secondary); position: relative;
+  padding: 3px 6px 3px 4px; border-radius: 4px;
+  margin: -3px 0 -3px -4px; transition: background 150ms;
+}
+.radio-label:hover { background: rgba(255,255,255,0.04) }
+.radio-label input { display: none }
+.radio-dot {
+  width: 14px; height: 14px; border: 2px solid var(--text-muted);
+  border-radius: 50%; transition: border-color 150ms; position: relative; flex-shrink: 0
+}
+.radio-label input:checked + .radio-dot { border-color: var(--accent) }
+.radio-label input:checked + .radio-dot::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 8px; height: 8px; background: var(--accent); border-radius: 50%;
+  animation: dot-pop 200ms var(--ease-spring);
+}
+.radio-label > span:last-child { line-height: 1 }
+
+#once-options, #weekly-options { display: flex; gap: 8px; align-items: center; padding-top: 4px }
+#day-picker { display: flex; gap: 4px }
+
+.day-btn {
+  width: 26px; height: 26px; background: var(--bg-day-btn);
+  border: 1px solid transparent; border-radius: 5px;
+  color: var(--text-tertiary); font-size: 11px; font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+.day-btn:hover { background: var(--bg-day-btn-hover); color: var(--text-primary); transform: translateY(-1px) }
+.day-btn:active { transform: scale(0.9) translateY(0) }
+.day-btn.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(16, 185, 129, 0.3) }

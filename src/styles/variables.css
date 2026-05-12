@@ -1,0 +1,46 @@
+:root {
+  --bg-base: #0c0c10;
+  --bg-surface: rgba(18, 18, 24, 0.55);
+  --bg-glass: rgba(24, 24, 30, 0.45);
+  --bg-glass-hover: rgba(34, 34, 42, 0.6);
+  --bg-input: rgba(40, 40, 48, 0.35);
+  --bg-day-btn: rgba(255, 255, 255, 0.05);
+  --bg-day-btn-hover: rgba(255, 255, 255, 0.1);
+  --bg-modal: rgba(14, 14, 18, 0.92);
+  --border-glass: rgba(255, 255, 255, 0.06);
+  --border-glass-inner: rgba(255, 255, 255, 0.04);
+  --border-active: #10b981;
+  --accent: #10b981;
+  --accent-hover: #34d399;
+  --accent-dim: rgba(16, 185, 129, 0.15);
+  --text-primary: #e8e8ea;
+  --text-secondary: #8a8a92;
+  --text-tertiary: #5c5c64;
+  --text-muted: #4a4a50;
+  --danger: #ef4444;
+  --danger-dim: rgba(239, 68, 68, 0.12);
+  --scrollbar-bg: rgba(255, 255, 255, 0.03);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms var(--ease-out);
+  --transition-normal: 250ms var(--ease-spring);
+  --transition-slow: 400ms var(--ease-spring);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box }
+
+body {
+  font-family: 'Inter', -apple-system, 'PingFang SC', sans-serif;
+  background: rgba(12, 12, 16, 0.45);
+  color: var(--text-primary);
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  overflow: hidden;
+  letter-spacing: -0.01em;
+}

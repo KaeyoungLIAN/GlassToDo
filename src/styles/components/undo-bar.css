@@ -1,0 +1,19 @@
+.undo-bar {
+  background: var(--bg-glass); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  box-shadow: inset 0 1px 0 var(--border-glass-inner);
+  border-radius: var(--radius-md); padding: 10px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  animation: undo-enter 300ms var(--ease-spring) both;
+  font-size: 13px; color: var(--text-secondary);
+}
+
+.undo-btn {
+  padding: 4px 12px; background: var(--accent-dim); color: var(--accent);
+  border: 1px solid transparent; border-radius: 6px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.undo-btn:hover { background: rgba(16, 185, 129, 0.25); transform: translateY(-1px) }
+.undo-btn:active { transform: scale(0.95) translateY(0) }

@@ -1,0 +1,50 @@
+.timepicker-wrapper { position: relative; display: inline-flex }
+
+.timepicker-trigger {
+  display: flex; align-items: center; gap: 4px; padding: 5px 10px;
+  background: var(--bg-input); border: 1px solid var(--border-glass);
+  border-radius: 4px; color: var(--text-primary); font-size: 12px;
+  font-family: inherit; cursor: pointer; outline: none;
+  transition: border-color 200ms var(--ease-out), transform var(--transition-fast);
+  white-space: nowrap;
+}
+.timepicker-trigger:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-1px) }
+.timepicker-trigger:focus-visible { border-color: rgba(16, 185, 129, 0.4) }
+.timepicker-trigger svg { opacity: 0.45; flex-shrink: 0 }
+
+.timepicker-popup {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 300;
+  background: rgba(24, 24, 30, 0.92); backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.5);
+  border-radius: 10px; padding: 12px;
+  animation: picker-enter 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: top left;
+  min-width: 108px;
+}
+
+.timepicker-columns { display: flex; align-items: center; gap: 2px }
+.timepicker-column { display: flex; flex-direction: column; align-items: center; gap: 1px }
+
+.timepicker-arrow {
+  width: 32px; height: 22px; display: flex; align-items: center;
+  justify-content: center; background: transparent; border: none;
+  color: var(--text-tertiary); cursor: pointer; border-radius: 4px;
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+.timepicker-arrow:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); transform: translateY(-1px) }
+.timepicker-arrow:active { transform: scale(0.96) translateY(0) }
+
+.timepicker-value {
+  display: flex; align-items: center; justify-content: center;
+  width: 42px; height: 32px; background: var(--bg-input);
+  border: 1px solid var(--border-glass); border-radius: 6px;
+  font-size: 16px; font-weight: 600; color: var(--text-primary);
+  font-family: inherit; cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+.timepicker-value:hover { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.08) }
+.timepicker-value:active { transform: scale(0.95) }
+
+.timepicker-sep { font-size: 16px; font-weight: 600; color: var(--text-tertiary); margin-top: 22px }

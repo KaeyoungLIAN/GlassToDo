@@ -1,0 +1,10 @@
+#task-area {
+  flex: 1; overflow-y: auto; padding: 6px 10px;
+}
+
+#task-area::-webkit-scrollbar { width: 5px }
+#task-area::-webkit-scrollbar-track { background: var(--scrollbar-bg) }
+#task-area::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px }
+#task-area::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.18) }
+
+#task-list { display: flex; flex-direction: column; gap: 4px }

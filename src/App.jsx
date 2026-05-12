@@ -26,8 +26,11 @@ export default function App() {
   const [undoTask, setUndoTask] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [lang, setLang] = useState("en");
+  const [showCompleted, setShowCompleted] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
-  const [showArchive, setShowArchive] = useState(false);
+  const [completingId, setCompletingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -42,38 +45,55 @@ export default function App() {
     } catch (_) {}
   }, []);
 
-  const runArchive = useCallback(async () => {
-    try {
-      const archived = await invoke("run_archive");
-      if (archived && archived.length > 0) {
-        showToast(t(lang, "archived") + " " + archived.length + " " + t(lang, "tasks"));
-        await loadTasks();
-      }
-    } catch (_) {}
-  }, [showToast, lang, loadTasks]);
-
   // Load settings on mount
   useEffect(() => {
     invoke("get_settings")
-      .then((s) => { if (s.language) setLang(s.language); })
+      .then((s) => {
+        if (s.language) setLang(s.language);
+        if (s.show_completed !== undefined) setShowCompleted(s.show_completed);
+      })
       .catch(() => {});
   }, []);
 
-  useEffect(() => { loadTasks().then(() => runArchive()); const iv = setInterval(() => invoke("check_and_notify").catch(() => {}), 60000); return () => clearInterval(iv); }, [loadTasks, runArchive]);
+  useEffect(() => { loadTasks(); const iv = setInterval(() => invoke("check_and_notify").catch(() => {}), 60000); return () => clearInterval(iv); }, [loadTasks]);
   useEffect(() => { const cb = () => { if (!document.hidden) loadTasks(); }; document.addEventListener("visibilitychange", cb); return () => document.removeEventListener("visibilitychange", cb); }, [loadTasks]);
 
   // ── filtering ──
   const dateStr = fmt(currentDate);
-  const filtered = showArchive
-    ? tasks.filter((t) => t.archived).sort((a, b) => a.created_at < b.created_at ? 1 : -1)
-    : tasks
-        .filter(
-          (t) =>
-            !t.archived &&
-            (t.completed || t.reminder_type === "weekly" ||
-            (t.reminder_data.datetime && t.reminder_data.datetime.startsWith(dateStr)))
-        )
-        .sort((a, b) => a.completed - b.completed);
+  const today = new Date();
+  const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+  const yesterdayStr = fmt(yesterday);
+
+  // Week start (Monday)
+  const weekStart = new Date(today);
+  const day = weekStart.getDay();
+  weekStart.setDate(weekStart.getDate() - (day === 0 ? 6 : day - 1));
+  const weekStartStr = fmt(weekStart);
+
+  const taskDate = (t) => {
+    if (t.reminder_data?.datetime && t.reminder_data.datetime.length >= 10)
+      return t.reminder_data.datetime.slice(0, 10);
+    return t.created_at.slice(0, 10);
+  };
+
+  const yesterdayCompleted = tasks.filter((t) => t.completed && taskDate(t) === yesterdayStr).length;
+  const weekCompleted = tasks.filter((t) => t.completed && taskDate(t) >= weekStartStr && taskDate(t) <= dateStr).length;
+
+  const q = searchQuery.toLowerCase().trim();
+  const filtered = tasks
+    .filter(
+      (t) => {
+        if (completingId === t.id) return true;
+        if (!showCompleted && t.completed) return false;
+        if (q && !t.content.toLowerCase().includes(q)) return false;
+        return t.completed || t.reminder_type === "weekly" ||
+          (t.reminder_data.datetime && t.reminder_data.datetime.startsWith(dateStr));
+      }
+    )
+    .sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      return a.position - b.position;
+    });
 
   // ── CRUD ──
   const addTask = useCallback(
@@ -130,7 +150,6 @@ export default function App() {
 
   const cancelDelete = useCallback(async () => {
     clearTimeout(window.__undoTimer);
-    // If the task is still in mid-animation, restore it
     if (deletingId) {
       setDeletingId(null);
     }
@@ -153,10 +172,18 @@ export default function App() {
     async (id) => {
       try {
         await invoke("toggle_complete", { id });
-        await loadTasks();
+        if (!showCompleted) {
+          setCompletingId(id);
+          setTimeout(() => {
+            loadTasks();
+            setCompletingId(null);
+          }, 500);
+        } else {
+          await loadTasks();
+        }
       } catch (_) {}
     },
-    [loadTasks]
+    [loadTasks, showCompleted]
   );
 
   const startEdit = useCallback((t) => {
@@ -169,6 +196,29 @@ export default function App() {
   const cancelEdit = useCallback(() => {
     setEditingId(null);
   }, []);
+
+  const togglePin = useCallback(
+    async (id) => {
+      try {
+        const t = tasks.find((x) => x.id === id);
+        if (t) {
+          await invoke("update_task", { task: { ...t, pinned: !t.pinned } });
+          await loadTasks();
+        }
+      } catch (_) {}
+    },
+    [tasks, loadTasks]
+  );
+
+  const handleReorder = useCallback(
+    async (ids) => {
+      try {
+        await invoke("reorder_tasks", { ids });
+        await loadTasks();
+      } catch (_) {}
+    },
+    [loadTasks]
+  );
 
   // ── navigation ──
   const goPrev = () => setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1));
@@ -184,17 +234,17 @@ export default function App() {
     loadTasks();
   }, [loadTasks]);
 
-  const handleSettingsChange = useCallback((newLang, _dataDir) => {
+  const handleSettingsChange = useCallback((newLang, _dataDir, showComp) => {
     setLang(newLang);
+    if (showComp !== undefined) setShowCompleted(showComp);
   }, []);
 
   return (
     <>
       <TitleBar
         onOpenSettings={() => setShowSettings(true)}
-        showArchive={showArchive}
-        onToggleArchive={() => setShowArchive((a) => !a)}
-        archivedCount={tasks.filter((t) => t.archived).length}
+        showSearch={showSearch}
+        onToggleSearch={() => setShowSearch((s) => !s)}
       />
       <DateBar
         dateStr={dateStr}
@@ -205,41 +255,64 @@ export default function App() {
         onRefresh={handleRefresh}
         lang={lang}
       />
+      {showSearch && (
+        <div className="search-bar">
+          <svg className="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            className="search-input"
+            type="text"
+            placeholder={t(lang, "searchPlaceholder")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            autoFocus
+          />
+          {searchQuery && (
+            <button className="search-clear" onClick={() => { setSearchQuery(""); setShowSearch(false); }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
+      )}
+      {(yesterdayCompleted > 0 || weekCompleted > 0) && !showSearch && (
+        <div className="stats-line">
+          {yesterdayCompleted > 0 && <span>{t(lang, "yesterday")} {yesterdayCompleted}</span>}
+          {yesterdayCompleted > 0 && weekCompleted > 0 && <span className="stats-dot">·</span>}
+          {weekCompleted > 0 && <span>{t(lang, "thisWeek")} {weekCompleted}</span>}
+        </div>
+      )}
       <TaskList
         tasks={filtered}
         onToggle={toggleComplete}
         onDelete={deleteTask}
         onEdit={startEdit}
+        onPin={togglePin}
+        onReorder={handleReorder}
         undoId={undoId}
         undoContent={undoContent}
         onUndo={cancelDelete}
         lang={lang}
         deletingId={deletingId}
-        showArchive={showArchive}
-        onRestore={async (task) => {
-          try {
-            await invoke("update_task", { task: { ...task, archived: false } });
-            await loadTasks();
-            showToast(t(lang, "restored"));
-          } catch (_) {}
-        }}
+        completingId={completingId}
       />
-      {!showArchive && (
-        <BottomPanel
-          editingId={editingId}
-          editText={editText}
-          editRtype={editRtype}
-          editRdata={editRdata}
-          onSave={addTask}
-          onCancelEdit={cancelEdit}
-          dateStr={dateStr}
-          lang={lang}
-        />
-      )}
+      <BottomPanel
+        editingId={editingId}
+        editText={editText}
+        editRtype={editRtype}
+        editRdata={editRdata}
+        onSave={addTask}
+        onCancelEdit={cancelEdit}
+        dateStr={dateStr}
+        lang={lang}
+      />
       {toast && <div className="toast">{toast}</div>}
       {showSettings && (
         <SettingsModal
           lang={lang}
+          showCompleted={showCompleted}
           onClose={() => setShowSettings(false)}
           onSettingsChange={handleSettingsChange}
         />

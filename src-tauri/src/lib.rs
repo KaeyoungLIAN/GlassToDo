@@ -7,6 +7,7 @@ use tauri::{
     AppHandle, Manager, State, WindowEvent,
     menu::{MenuBuilder, MenuItemBuilder},
     tray::TrayIconBuilder,
+    webview::{Effect, EffectsBuilder},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -20,7 +21,9 @@ pub struct ReminderData {
 pub struct TaskItem {
     pub id: u32, pub content: String, pub completed: bool,
     #[serde(default)]
-    pub archived: bool,
+    pub pinned: bool,
+    #[serde(default)]
+    pub position: u32,
     pub reminder_type: String, pub reminder_data: ReminderData,
     pub last_reminded: Option<String>, pub created_at: String,
 }
@@ -32,15 +35,18 @@ pub struct TodoData { pub tasks: Vec<TaskItem>, pub next_id: u32 }
 pub struct Settings {
     pub language: String,
     pub data_dir: Option<String>,
-    pub last_archive_date: Option<String>,
+    #[serde(default = "default_true")]
+    pub show_completed: bool,
 }
+
+fn default_true() -> bool { true }
 
 impl Default for Settings {
     fn default() -> Self {
         Settings {
             language: "en".to_string(),
             data_dir: None,
-            last_archive_date: None,
+            show_completed: true,
         }
     }
 }
@@ -171,8 +177,10 @@ fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
     let settings = load_settings(&s_path);
     let path = data_path(&app, &settings);
     let mut data = load_tasks(&path);
+    let position = data.tasks.len() as u32;
     let task = TaskItem {
         id: data.next_id, content, completed: false,
+        pinned: false, position,
         reminder_type, reminder_data, last_reminded: None,
         created_at: Local::now().format("%Y-%m-%dT%H:%M:%S").to_string(),
     };
@@ -255,46 +263,20 @@ fn check_and_notify(state: State<'_, AppState>, app: AppHandle) -> Result<Vec<St
 }
 
 #[tauri::command]
-fn run_archive(state: State<'_, AppState>, app: AppHandle) -> Result<Vec<u32>, String> {
+fn reorder_tasks(state: State<'_, AppState>, app: AppHandle, ids: Vec<u32>) -> Result<(), String> {
     let s_path = settings_path(&app);
-    let mut settings = load_settings(&s_path);
+    let settings = load_settings(&s_path);
     let path = data_path(&app, &settings);
     let mut data = load_tasks(&path);
 
-    let today = Local::now().format("%Y-%m-%d").to_string();
-    let last = settings.last_archive_date.clone().unwrap_or_default();
-
-    // Skip if already archived today
-    if last == today {
-        return Ok(vec![]);
-    }
-
-    let mut archived_ids = vec![];
-    for task in data.tasks.iter_mut() {
-        if task.archived { continue; }
-        if task.reminder_type == "weekly" { continue; }
-
-        let task_date = if let Some(ref dt) = task.reminder_data.datetime {
-            if dt.len() >= 10 { dt[..10].to_string() } else { String::new() }
-        } else {
-            task.created_at[..10].to_string()
-        };
-
-        if !task_date.is_empty() && task_date < today {
-            task.archived = true;
-            archived_ids.push(task.id);
+    for (i, id) in ids.iter().enumerate() {
+        if let Some(t) = data.tasks.iter_mut().find(|t| t.id == *id) {
+            t.position = i as u32;
         }
     }
-
-    if !archived_ids.is_empty() {
-        save_tasks(&path, &data)?;
-        *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
-    }
-
-    settings.last_archive_date = Some(today);
-    save_settings(&s_path, &settings)?;
-
-    Ok(archived_ids)
+    save_tasks(&path, &data)?;
+    *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
+    Ok(())
 }
 
 struct AppState { data: Mutex<Vec<TaskItem>> }
@@ -327,12 +309,17 @@ pub fn run() {
                 w.clone().on_window_event(move |event| {
                     if let WindowEvent::CloseRequested { .. } = event { w.hide().ok(); }
                 });
+
+                #[cfg(target_os = "windows")]
+                w.set_effects(EffectsBuilder::new()
+                    .effect(Effect::Acrylic)
+                    .build())?;
             }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             get_tasks, add_task, update_task, delete_task, toggle_complete, check_and_notify,
-            get_settings, update_settings, pick_directory, run_archive,
+            get_settings, update_settings, pick_directory, reorder_tasks,
         ])
         .run(tauri::generate_context!())
         .expect("error running GlassTodo");

@@ -1,0 +1,18 @@
+/* GlassTodo — Taste UI Design System
+ * Split into component-level files for maintainability.
+ * Import order: variables → animations → components
+ */
+@import "./variables.css";
+@import "./animations.css";
+@import "./components/titlebar.css";
+@import "./components/datebar.css";
+@import "./components/task-area.css";
+@import "./components/task-card.css";
+@import "./components/undo-bar.css";
+@import "./components/empty-state.css";
+@import "./components/bottom-panel.css";
+@import "./components/toast.css";
+@import "./components/settings.css";
+@import "./components/datepicker.css";
+@import "./components/timepicker.css";
+@import "./components/search-bar.css";

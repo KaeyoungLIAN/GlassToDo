@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { t, availableLangs } from "../i18n";
 
-export default function SettingsModal({ lang, onClose, onSettingsChange }) {
-  const [settings, setSettings] = useState({ language: lang, data_dir: null });
+export default function SettingsModal({ lang, showCompleted, onClose, onSettingsChange }) {
+  const [settings, setSettings] = useState({ language: lang, data_dir: null, show_completed: true });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,22 +15,21 @@ export default function SettingsModal({ lang, onClose, onSettingsChange }) {
       .catch(() => setLoading(false));
   }, []);
 
-  const handleLangChange = (e) => {
-    const newLang = e.target.value;
-    const updated = { ...settings, language: newLang };
+  const update = async (updated) => {
     setSettings(updated);
-    invoke("update_settings", { settings: updated }).catch(console.error);
-    onSettingsChange(newLang, updated.data_dir);
+    await invoke("update_settings", { settings: updated }).catch(console.error);
+    onSettingsChange(updated.language, updated.data_dir, updated.show_completed);
+  };
+
+  const handleLangChange = (code) => {
+    update({ ...settings, language: code });
   };
 
   const handlePickDir = async () => {
     try {
       const dir = await invoke("pick_directory");
       if (dir) {
-        const updated = { ...settings, data_dir: dir };
-        setSettings(updated);
-        await invoke("update_settings", { settings: updated });
-        onSettingsChange(settings.language, dir);
+        update({ ...settings, data_dir: dir });
       }
     } catch (e) {
       console.error("pick directory error:", e);
@@ -38,10 +37,11 @@ export default function SettingsModal({ lang, onClose, onSettingsChange }) {
   };
 
   const handleResetDir = async () => {
-    const updated = { ...settings, data_dir: null };
-    setSettings(updated);
-    await invoke("update_settings", { settings: updated });
-    onSettingsChange(settings.language, null);
+    update({ ...settings, data_dir: null });
+  };
+
+  const toggleShowCompleted = () => {
+    update({ ...settings, show_completed: !settings.show_completed });
   };
 
   if (loading) {
@@ -76,17 +76,23 @@ export default function SettingsModal({ lang, onClose, onSettingsChange }) {
                 <button
                   key={l.code}
                   className={`lang-btn${settings.language === l.code ? " active" : ""}`}
-                  onClick={() => {
-                    const updated = { ...settings, language: l.code };
-                    setSettings(updated);
-                    invoke("update_settings", { settings: updated }).catch(console.error);
-                    onSettingsChange(l.code, updated.data_dir);
-                  }}
+                  onClick={() => handleLangChange(l.code)}
                 >
                   {l.name}
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Show completed tasks */}
+          <div className="settings-field">
+            <label className="settings-label">{t(settings.language, "showCompleted")}</label>
+            <label className="toggle-row" onClick={toggleShowCompleted}>
+              <div className={`toggle-track${settings.show_completed ? " on" : ""}`}>
+                <div className="toggle-thumb" />
+              </div>
+              <span className="toggle-label">{settings.show_completed ? t(settings.language, "yes") : t(settings.language, "no")}</span>
+            </label>
           </div>
 
           {/* Data directory */}

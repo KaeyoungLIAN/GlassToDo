@@ -1,0 +1,71 @@
+/** ── Keyframes ── */
+
+/* gear-wiggle (titlebar) */
+@keyframes gear-wiggle {
+  0%   { transform: rotate(0deg) }
+  25%  { transform: rotate(15deg) }
+  75%  { transform: rotate(-10deg) }
+  100% { transform: rotate(0deg) }
+}
+
+/* spin (refresh btn) */
+@keyframes spin {
+  from { transform: rotate(0deg) }
+  to   { transform: rotate(360deg) }
+}
+
+/* task-enter */
+@keyframes task-enter {
+  from { opacity: 0; transform: translateY(8px) scale(0.97) }
+  to   { opacity: 1; transform: translateY(0) scale(1) }
+}
+
+/* fly-left (delete) */
+@keyframes fly-left {
+  from { opacity: 1; transform: translateX(0) scale(1) }
+  to   { opacity: 0; transform: translateX(-120%) scale(0.92) }
+}
+
+/* complete-sink */
+@keyframes complete-sink {
+  from { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px) }
+  to   { opacity: 0; transform: translateY(8px) scale(0.92); filter: blur(2px) }
+}
+
+/* check-fade (checkbox) */
+@keyframes check-fade {
+  from { opacity: 0; transform: rotate(45deg) scale(0.85) }
+  to   { opacity: 1; transform: rotate(45deg) scale(1) }
+}
+
+/* undo-enter */
+@keyframes undo-enter {
+  from { opacity: 0; transform: translateY(12px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+
+/* dot-pop (radio) */
+@keyframes dot-pop { from { transform: scale(0) } to { transform: scale(1) } }
+
+/* toast */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px) }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) }
+}
+@keyframes toast-out {
+  from { opacity: 1 }
+  to   { opacity: 0; transform: translateX(-50%) translateY(-8px) }
+}
+
+/* overlay + modal */
+@keyframes overlay-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.92) translateY(12px) }
+  to   { opacity: 1; transform: scale(1) translateY(0) }
+}
+
+/* picker-enter */
+@keyframes picker-enter {
+  from { opacity: 0; transform: scale(0.92) translateY(-4px) }
+  to   { opacity: 1; transform: scale(1) translateY(0) }
+}
