@@ -312,9 +312,29 @@ pub fn run() {
                 });
 
                 #[cfg(target_os = "windows")]
-                w.set_effects(EffectsBuilder::new()
-                    .effect(Effect::Acrylic)
-                    .build())?;
+                {
+                    w.set_effects(EffectsBuilder::new()
+                        .effect(Effect::Acrylic)
+                        .build())?;
+
+                    // Set window rounded corners (Win11-style)
+                    use std::mem::size_of;
+                    use windows::Win32::Graphics::Dwm::{
+                        DwmSetWindowAttribute,
+                        DWM_WINDOW_CORNER_PREFERENCE,
+                        DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND,
+                    };
+
+                    let preference = DWMWCP_ROUND;
+                    unsafe {
+                        DwmSetWindowAttribute(
+                            w.hwnd()?,
+                            DWMWA_WINDOW_CORNER_PREFERENCE,
+                            &preference as *const _ as *const std::ffi::c_void,
+                            size_of::<DWM_WINDOW_CORNER_PREFERENCE>() as u32,
+                        );
+                    }
+                }
             }
             Ok(())
         })
