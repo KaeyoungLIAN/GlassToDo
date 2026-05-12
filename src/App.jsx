@@ -86,8 +86,8 @@ export default function App() {
         if (completingId === t.id) return true;
         if (!showCompleted && t.completed) return false;
         if (q && !t.content.toLowerCase().includes(q)) return false;
-        return t.completed || t.reminder_type === "weekly" ||
-          (t.reminder_data.datetime && t.reminder_data.datetime.startsWith(dateStr));
+        const td = taskDate(t);
+        return td === dateStr || t.reminder_type === "weekly";
       }
     )
     .sort((a, b) => {
@@ -102,10 +102,14 @@ export default function App() {
         if (editingId !== null) {
           const t = tasks.find((x) => x.id === editingId);
           if (t) {
-            t.content = content;
-            t.reminder_type = rtype;
-            t.reminder_data = rdata;
-            await invoke("update_task", { task: t });
+            await invoke("update_task", {
+              task: {
+                ...t,
+                content,
+                reminder_type: rtype,
+                reminder_data: rdata,
+              },
+            });
           }
           setEditingId(null);
           showToast(t(lang, "taskUpdated"));
