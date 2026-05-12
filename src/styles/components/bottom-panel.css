@@ -54,7 +54,7 @@
   transition: grid-template-rows 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 #reminder-collapse.open { grid-template-rows: 1fr }
-#reminder-inner { overflow: hidden }
+#reminder-inner { overflow: visible }
 
 #reminder-summary {
   display: flex; align-items: center; gap: 5px; width: 100%;
