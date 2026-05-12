@@ -48,4 +48,4 @@
 .timepicker-value:hover { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.08) }
 .timepicker-value:active { transform: scale(0.95) }
 
-.timepicker-sep { font-size: 16px; font-weight: 600; color: var(--text-tertiary); margin-top: 22px }
+.timepicker-sep { font-size: 16px; font-weight: 600; color: var(--text-tertiary); align-self: center }
