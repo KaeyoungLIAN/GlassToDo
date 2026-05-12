@@ -168,6 +168,22 @@ fn pick_directory(app: AppHandle) -> Result<Option<String>, String> {
 // ── Task commands ──
 
 #[tauri::command]
+fn minimize_window(app: AppHandle) -> Result<(), String> {
+    app.get_webview_window("main")
+        .ok_or("Window not found")?
+        .minimize()
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn hide_window(app: AppHandle) -> Result<(), String> {
+    app.get_webview_window("main")
+        .ok_or("Window not found")?
+        .hide()
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 fn get_tasks(state: State<'_, AppState>, _app: AppHandle) -> Result<Vec<TaskItem>, String> {
     Ok(state.data.lock().map_err(|e| e.to_string())?.clone())
 }
@@ -343,6 +359,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_tasks, add_task, update_task, delete_task, toggle_complete, check_and_notify,
             get_settings, update_settings, pick_directory, reorder_tasks,
+            minimize_window, hide_window,
         ])
         .run(tauri::generate_context!())
         .expect("error running GlassTodo");
