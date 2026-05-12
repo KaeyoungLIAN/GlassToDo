@@ -138,39 +138,44 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       {/* Scheduled reminder options — always visible when scheduled mode */}
       {taskMode === "scheduled" && (
         <div id="reminder-options">
-          <div id="reminder-type">
-            <label className="radio-label">
-              <input type="radio" name="rtype" value="once" checked={rtype === "once"} onChange={() => setRtype("once")} />
+          {/* Single-date option: radio + date + time on one row */}
+          <div className="reminder-row">
+            <label className={"radio-label" + (rtype === "once" ? " active" : "")} onClick={() => setRtype("once")}>
+              <input type="radio" name="rtype" value="once" checked={rtype === "once"} readOnly />
               <span className="radio-dot" />
               <span>{t(lang, "oneTime")}</span>
             </label>
-            <label className="radio-label">
-              <input type="radio" name="rtype" value="weekly" checked={rtype === "weekly"} onChange={() => setRtype("weekly")} />
+            {rtype === "once" && (
+              <div className="reminder-pickers">
+                <DatePicker value={onceDate} onChange={setOnceDate} lang={lang} />
+                <TimePicker value={onceTime} onChange={setOnceTime} />
+              </div>
+            )}
+          </div>
+          {/* Weekly option: radio + day-picker + time on one row */}
+          <div className="reminder-row">
+            <label className={"radio-label" + (rtype === "weekly" ? " active" : "")} onClick={() => setRtype("weekly")}>
+              <input type="radio" name="rtype" value="weekly" checked={rtype === "weekly"} readOnly />
               <span className="radio-dot" />
               <span>{t(lang, "weekly")}</span>
             </label>
-          </div>
-          {rtype === "once" ? (
-            <div id="once-options">
-              <DatePicker value={onceDate} onChange={setOnceDate} lang={lang} />
-              <TimePicker value={onceTime} onChange={setOnceTime} />
-            </div>
-          ) : (
-            <div id="weekly-options">
-              <div id="day-picker">
-                {DAYS.map((d) => (
-                  <button
-                    key={d.key}
-                    className={"day-btn" + (activeDays.has(d.key) ? " active" : "")}
-                    onClick={() => toggleDay(d.key)}
-                  >
-                    {d.label}
-                  </button>
-                ))}
+            {rtype === "weekly" && (
+              <div className="reminder-pickers">
+                <div id="day-picker">
+                  {DAYS.map((d) => (
+                    <button
+                      key={d.key}
+                      className={"day-btn" + (activeDays.has(d.key) ? " active" : "")}
+                      onClick={() => toggleDay(d.key)}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+                <TimePicker value={weeklyTime} onChange={setWeeklyTime} />
               </div>
-              <TimePicker value={weeklyTime} onChange={setWeeklyTime} />
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>
