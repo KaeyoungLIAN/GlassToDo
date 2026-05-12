@@ -14,7 +14,7 @@
 
 #title-left { display: flex; align-items: center; gap: 8px }
 
-#title-drag { flex: 1; height: 100%; min-width: 20px }
+#title-drag { flex: 1; height: 100%; min-width: 20px; -webkit-app-region: drag }
 
 #title-dot {
   width: 7px; height: 7px; border-radius: 50%;
@@ -34,6 +34,7 @@
   display: flex; align-items: center; justify-content: center;
   transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
   pointer-events: auto;
+  -webkit-app-region: no-drag;
 }
 .title-btn:hover { background: var(--bg-glass-hover); color: var(--text-primary); transform: translateY(-1px) }
 .title-btn:active { transform: scale(0.92) translateY(0) }
