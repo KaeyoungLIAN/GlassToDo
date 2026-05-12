@@ -124,6 +124,7 @@ export default function App() {
         await loadTasks();
       } catch (e) {
         showToast(t(lang, "error") + ": " + String(e));
+        await loadTasks(); // Refresh even on error
       }
     },
     [editingId, tasks, loadTasks, showToast, lang]
@@ -281,13 +282,31 @@ export default function App() {
           )}
         </div>
       )}
-      {(yesterdayCompleted > 0 || weekCompleted > 0) && !showSearch && (
+      {/* Stats + Save row */}
+      {!showSearch && (
         <div className="stats-line">
-          {yesterdayCompleted > 0 && <span>{t(lang, "yesterday")} {yesterdayCompleted}</span>}
-          {yesterdayCompleted > 0 && weekCompleted > 0 && <span className="stats-dot">·</span>}
-          {weekCompleted > 0 && <span>{t(lang, "thisWeek")} {weekCompleted}</span>}
-        </div>
-      )}
+          {(yesterdayCompleted > 0 || weekCompleted > 0) && (
+            <>
+              {yesterdayCompleted > 0 && <span>{t(lang, "yesterday")} {yesterdayCompleted}</span>}
+              {yesterdayCompleted > 0 && weekCompleted > 0 && <span className="stats-dot">·</span>}
+              {weekCompleted > 0 && <span>{t(lang, "thisWeek")} {weekCompleted}</span>}
+            </>
+          )}
+          <button className="save-btn" onClick={async () => {
+            try {
+              // Force a save by toggling show_completed in settings
+              const s = await invoke("get_settings");
+              await invoke("update_settings", { settings: { ...s } });
+              showToast("✅ " + t(lang, "saved"));
+            } catch { showToast("⚠️ " + t(lang, "error")); }
+          }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" />
+            </svg>
+            <span>{t(lang, "save")}</span>
+          </button>
+        </div>)}
       <TaskList
         tasks={filtered}
         onToggle={toggleComplete}
