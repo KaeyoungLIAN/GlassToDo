@@ -3,7 +3,7 @@ import { t } from "../i18n";
 
 const WN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPin, lang, deletingId, completingId, isFirst, isLast, onMoveUp, onMoveDown }) {
+export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPin, lang, deletingId, completingId, isFirst, isLast, onMoveUp, onMoveDown, onTogglePersist }) {
   const isDeleting = task.id === deletingId;
   const isCompleting = task.id === completingId;
   return (
@@ -65,6 +65,13 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
           <line x1="4" y1="20" x2="20" y2="20" />
           <line x1="12" y1="3" x2="12" y2="16" />
           <polyline points="7 10 12 3 17 10" />
+        </svg>
+      </button>
+      <button className={"action-btn persist-btn" + (task.persist ? " active" : "")} onClick={onTogglePersist} title={t(lang, "persist")}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z" />
+          <path d="M2 17l10 5 10-5" />
+          <path d="M2 12l10 5 10-5" />
         </svg>
       </button>
       <button className="action-btn edit-btn" onClick={() => onEdit(task)} title="Edit">
