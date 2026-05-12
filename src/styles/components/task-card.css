@@ -73,18 +73,23 @@
 .pin-btn:hover { background: var(--accent-dim); color: var(--accent); transform: translateY(-1px) !important }
 .pin-btn:active { transform: scale(0.85) translateY(0) !important }
 
-/* ── Drag handle ── */
+/* ── Reorder buttons ── */
 .drag-wrapper { position: relative }
-.drag-wrapper.dragging .task-card { opacity: 0.4 }
-.drag-wrapper.drag-over::after {
-  content: ''; position: absolute; top: -3px; left: 4px; right: 4px;
-  height: 2px; background: var(--accent); border-radius: 2px; z-index: 10; opacity: 0.6
+.reorder-btns {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0; flex-shrink: 0; align-self: stretch;
+  justify-content: center; width: 16px; margin-left: -2px;
 }
-.drag-handle {
+.reorder-btn {
   display: flex; align-items: center; justify-content: center;
-  width: 16px; height: 26px; flex-shrink: 0; color: var(--text-muted); cursor: grab;
-  opacity: 0.25; transition: opacity var(--transition-fast); border-radius: 4px; margin-left: -4px;
+  width: 16px; height: 12px; background: transparent; border: none;
+  color: var(--text-muted); cursor: pointer; border-radius: 2px;
+  padding: 0; opacity: 0.3;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
 }
-.task-card:hover .drag-handle { opacity: 0.5 }
-.drag-handle:hover { opacity: 0.8 !important; color: var(--text-secondary) }
-.drag-wrapper:active .drag-handle { cursor: grabbing }
+.task-card:hover .reorder-btn { opacity: 0.6 }
+.reorder-btn:hover { opacity: 1 !important; color: var(--text-secondary) }
+.reorder-btn:active { transform: scale(0.85) }
+.reorder-btn.disabled { opacity: 0.08 !important; cursor: default }
+.reorder-btn.disabled:hover { opacity: 0.08 !important }
+.reorder-btn.up svg, .reorder-btn.down svg { display: block }
