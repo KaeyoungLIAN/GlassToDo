@@ -48,50 +48,48 @@
 .mode-pill.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(16, 185, 129, 0.25) }
 .mode-pill svg { flex-shrink: 0 }
 
-/* ── Reminder options (tab-style) ── */
-#reminder-options { padding-top: 6px; display: flex; flex-direction: column; gap: 6px }
-
-/* Tab bar */
-#rtype-tabs {
-  display: flex; gap: 6px;
+/* ── Collapsible reminder ── */
+#reminder-collapse {
+  display: grid; grid-template-rows: 0fr;
+  transition: grid-template-rows 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
+#reminder-collapse.open { grid-template-rows: 1fr }
+#reminder-inner { overflow: hidden }
 
-.rtype-tab {
-  position: relative; flex: 1; padding: 6px 0;
-  background: var(--bg-input); border: 1px solid transparent;
-  border-radius: 6px; color: var(--text-tertiary);
-  font-size: 11px; font-weight: 600; font-family: inherit;
-  cursor: pointer; letter-spacing: 0.03em;
-  transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
+#reminder-summary {
+  display: flex; align-items: center; gap: 5px; width: 100%;
+  padding: 5px 8px; margin-top: 6px; background: var(--bg-input);
+  border: 1px solid transparent; border-radius: var(--radius-sm);
+  color: var(--text-tertiary); font-size: 11px; font-family: inherit;
+  cursor: pointer; transition: background 150ms, border-color 150ms, color 150ms, transform 150ms;
 }
-.rtype-tab:hover { background: var(--bg-glass-hover); color: var(--text-secondary); transform: translateY(-1px) }
-.rtype-tab:active { transform: scale(0.97) translateY(0) }
-.rtype-tab.active {
-  background: var(--accent-dim);
-  color: var(--accent);
-  border-color: rgba(16, 185, 129, 0.25);
+#reminder-summary:hover { background: var(--bg-glass-hover); border-color: var(--border-glass); color: var(--text-secondary); transform: translateY(-1px) }
+#reminder-summary:active { transform: scale(0.99) translateY(0) }
+#reminder-summary-icon { display: flex; align-items: center; opacity: 0.5; flex-shrink: 0 }
+#reminder-summary-text { flex: 1; text-align: left; letter-spacing: 0.01em }
+#reminder-chevron { flex-shrink: 0; transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1); opacity: 0.4 }
+#reminder-summary.options-open #reminder-chevron { transform: rotate(180deg) }
+
+/* ── Inline rtype pills + pickers row ── */
+#reminder-row { display: flex; align-items: center; gap: 8px; padding: 8px 0 4px }
+
+#rtype-toggle { display: flex; gap: 2px; flex-shrink: 0 }
+
+.rtype-pill {
+  padding: 4px 10px; background: var(--bg-input);
+  border: 1px solid transparent; border-radius: 5px;
+  color: var(--text-tertiary); font-size: 11px; font-weight: 500;
+  font-family: inherit; cursor: pointer;
+  transition: background 150ms, color 150ms, border-color 150ms, transform 150ms;
 }
+.rtype-pill:hover { background: var(--bg-glass-hover); color: var(--text-secondary); transform: translateY(-1px) }
+.rtype-pill:active { transform: scale(0.96) translateY(0) }
+.rtype-pill.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(16, 185, 129, 0.25) }
 
-/* Glow effect on active tab */
-.rtype-tab-glow {
-  position: absolute; top: 50%; left: 50%;
-  width: 0; height: 0; pointer-events: none;
-  transform: translate(-50%, -50%);
-  transition: all 400ms var(--ease-spring);
-}
-.rtype-tab.active .rtype-tab-glow {
-  width: 80px; height: 80px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
-  border-radius: 50%;
-}
-
-/* Content panel */
-#rtype-panel { padding: 2px 0 }
-
-.rtype-pickers { display: flex; align-items: center; gap: 6px }
-
+.rtype-pickers { display: flex; align-items: center; gap: 6px; flex: 1 }
 .picker-sep { font-size: 12px; color: var(--text-muted); flex-shrink: 0 }
+
+#day-picker { display: flex; gap: 4px }
 
 .day-btn {
   width: 26px; height: 26px; background: var(--bg-day-btn);

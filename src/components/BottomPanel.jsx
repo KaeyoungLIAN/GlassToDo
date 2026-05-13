@@ -22,6 +22,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
   const [onceTime, setOnceTime] = useState("14:30");
   const [activeDays, setActiveDays] = useState(new Set());
   const [weeklyTime, setWeeklyTime] = useState("09:00");
+  const [expanded, setExpanded] = useState(false);
   const inputRef = useRef(null);
 
   // Auto-expand when editing
@@ -38,6 +39,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
         setActiveDays(new Set(editRdata?.days || []));
         setWeeklyTime(editRdata?.time || "09:00");
       }
+      setExpanded(true);
       setTimeout(() => inputRef.current?.focus(), 350);
     }
   }, [editingId]);
@@ -75,6 +77,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
     if (editingId === null) {
       setRtype("once");
       setActiveDays(new Set());
+      setExpanded(false);
       setTaskMode("normal");
     }
     inputRef.current?.focus();
@@ -85,8 +88,31 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
   // Switch mode
   const switchMode = (mode) => {
     setTaskMode(mode);
+    if (mode === "scheduled" && !expanded) {
+      setExpanded(true);
+    }
+    if (mode === "normal") {
+      setExpanded(false);
+    }
     inputRef.current?.focus();
   };
+
+  // Summary text for collapsed state
+  const summaryLabel = rtype === "once"
+    ? `${onceDate || dateStr} ${onceTime}`
+    : `${[...activeDays].sort().map((d) => DAYS_MAP[d]).filter(Boolean).join(" ") || "Mon"} ${weeklyTime}`;
+
+  const summaryIcon = rtype === "once" ? (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  ) : (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12a9 9 0 1 1-9-9" /><path d="M12 6v6l3 2" />
+    </svg>
+  );
 
   return (
     <div id="bottom-panel" className={taskMode === "scheduled" ? "has-reminder" : ""}>
@@ -110,54 +136,67 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       </div>
 
       {/* Mode toggle pills */}
-      {editingId === null && (
-        <div id="mode-toggle">
-          <button
-            className={"mode-pill" + (taskMode === "normal" ? " active" : "")}
-            onClick={() => switchMode("normal")}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-            </svg>
-            <span>{t(lang, "normal")}</span>
-          </button>
-          <button
-            className={"mode-pill" + (taskMode === "scheduled" ? " active" : "")}
-            onClick={() => switchMode("scheduled")}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
-            <span>{t(lang, "scheduled")}</span>
-          </button>
-        </div>
-      )}
+      <div id="mode-toggle">
+        <button
+          className={"mode-pill" + (taskMode === "normal" ? " active" : "")}
+          onClick={() => switchMode("normal")}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+          </svg>
+          <span>Normal</span>
+        </button>
+        <button
+          className={"mode-pill" + (taskMode === "scheduled" ? " active" : "")}
+          onClick={() => switchMode("scheduled")}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <span>Scheduled</span>
+        </button>
+      </div>
 
-      {/* Scheduled reminder options — tab-style selector */}
-      {taskMode === "scheduled" && (
-        <div id="reminder-options">
-          {/* Tab buttons */}
-          <div id="rtype-tabs">
+      {/* Scheduled reminder options — collapsible */}
+      <div id="reminder-collapse" className={taskMode === "scheduled" ? "open" : ""}>
+        <div id="reminder-inner">
             <button
-              className={"rtype-tab" + (rtype === "once" ? " active" : "")}
-              onClick={() => setRtype("once")}
+              id="reminder-summary"
+              className={expanded ? "options-open" : ""}
+              onClick={() => setExpanded(!expanded)}
+              aria-label="Toggle reminder options"
             >
-              <span className="rtype-tab-glow" />
-              <span>{t(lang, "oneTime")}</span>
-            </button>
-            <button
-              className={"rtype-tab" + (rtype === "weekly" ? " active" : "")}
-              onClick={() => setRtype("weekly")}
+            <span id="reminder-summary-icon">{summaryIcon}</span>
+            <span id="reminder-summary-text">{summaryLabel}</span>
+            <svg
+              id="reminder-chevron"
+              width="12" height="12"
+              viewBox="0 0 24 24"
+              fill="none" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
             >
-              <span className="rtype-tab-glow" />
-              <span>{t(lang, "weekly")}</span>
-            </button>
-          </div>
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
 
-          {/* Content panel */}
-          <div id="rtype-panel">
+          <div id="reminder-options" className={expanded ? "open" : ""}>
+          <div id="reminder-row">
+            <div id="rtype-toggle">
+              <button
+                className={"rtype-pill" + (rtype === "once" ? " active" : "")}
+                onClick={() => setRtype("once")}
+              >
+                {t(lang, "oneTime")}
+              </button>
+              <button
+                className={"rtype-pill" + (rtype === "weekly" ? " active" : "")}
+                onClick={() => setRtype("weekly")}
+              >
+                {t(lang, "weekly")}
+              </button>
+            </div>
             {rtype === "once" ? (
               <div className="rtype-pickers">
                 <DatePicker value={onceDate} onChange={setOnceDate} lang={lang} />
@@ -181,8 +220,9 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
               </div>
             )}
           </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
