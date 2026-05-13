@@ -143,8 +143,6 @@ fn get_settings(app: AppHandle) -> Result<Settings, String> {
 #[tauri::command]
 fn update_settings(app: AppHandle, settings: Settings) -> Result<(), String> {
     let path = settings_path(&app);
-    // If data_dir changed, reload tasks from new location into state
-    let _old = load_settings(&path);
 
     save_settings(&path, &settings)?;
 
