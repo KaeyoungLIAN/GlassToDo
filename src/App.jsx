@@ -291,6 +291,8 @@ export default function App() {
         onRefresh={handleRefresh}
         onGoToDate={goToDate}
         lang={lang}
+        yesterdayCompleted={yesterdayCompleted}
+        weekCompleted={weekCompleted}
       />
       {showSearch && (
         <div className="search-bar">
