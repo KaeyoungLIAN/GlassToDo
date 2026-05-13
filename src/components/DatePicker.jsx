@@ -1,10 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { t, weekdayNames } from "../i18n";
-
-const MONTHS = [
-  "Jan","Feb","Mar","Apr","May","Jun",
-  "Jul","Aug","Sep","Oct","Nov","Dec",
-];
+import { monthNames, weekdayShort } from "../i18n";
 
 function daysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
@@ -63,7 +58,8 @@ export default function DatePicker({ value, onChange, lang }) {
   const dim = viewYear !== null && viewMonth !== null ? daysInMonth(viewYear, viewMonth) : 0;
   const fd = viewYear !== null && viewMonth !== null ? firstDayOfMonth(viewYear, viewMonth) : 0;
 
-  const wd = weekdayNames(lang);
+  const wd = weekdayShort(lang);
+  const mn = monthNames(lang);
 
   // Build grid cells
   const cells = [];
@@ -122,7 +118,7 @@ export default function DatePicker({ value, onChange, lang }) {
               </svg>
             </button>
             <span className="datepicker-title">
-              {MONTHS[viewMonth]} {viewYear}
+              {mn[viewMonth]} {viewYear}
             </span>
             <button type="button" className="datepicker-nav-btn" onClick={goNext} aria-label="Next month">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
