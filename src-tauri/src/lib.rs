@@ -278,13 +278,16 @@ fn reorder_tasks(state: State<'_, AppState>, app: AppHandle, ids: Vec<u32>) -> R
     *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
     Ok(())
 }
+#[tauri::command]
+fn minimize_window(window: tauri::Window) { let _ = window.minimize(); }
+#[tauri::command]
+fn hide_window(window: tauri::Window) { let _ = window.hide(); }
 
 struct AppState { data: Mutex<Vec<TaskItem>> }
 
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_window::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
@@ -321,6 +324,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_tasks, add_task, update_task, delete_task, toggle_complete, check_and_notify,
             get_settings, update_settings, pick_directory, reorder_tasks,
+            minimize_window, hide_window,
         ])
         .run(tauri::generate_context!())
         .expect("error running GlassTodo");
