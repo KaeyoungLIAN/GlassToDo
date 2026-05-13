@@ -66,3 +66,10 @@
   from { opacity: 0; transform: scale(0.92) translateY(-4px) }
   to   { opacity: 1; transform: scale(1) translateY(0) }
 }
+
+/* Datebar popup entry — includes translateX(-50%) for centering,
+   not overridden by animation (unlike picker-enter which conflicts) */
+@keyframes datebar-popup-in {
+  from { opacity: 0; transform: translateX(-50%) scale(0.92) translateY(-4px) }
+  to   { opacity: 1; transform: translateX(-50%) scale(1) translateY(0) }
+}
