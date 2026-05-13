@@ -23,6 +23,8 @@ pub struct TaskItem {
     #[serde(default)]
     pub pinned: bool,
     #[serde(default)]
+    pub persist: bool,
+    #[serde(default)]
     pub position: u32,
     pub reminder_type: String, pub reminder_data: ReminderData,
     pub last_reminded: Option<String>, pub created_at: String,
@@ -165,6 +167,26 @@ fn pick_directory(app: AppHandle) -> Result<Option<String>, String> {
 
 // ── Task commands ──
 
+// ── Window commands ──
+
+#[tauri::command]
+fn minimize_window(app: AppHandle) -> Result<(), String> {
+    if let Some(w) = app.get_webview_window("main") {
+        w.minimize().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn hide_window(app: AppHandle) -> Result<(), String> {
+    if let Some(w) = app.get_webview_window("main") {
+        w.hide().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+// ── Task commands ──
+
 #[tauri::command]
 fn get_tasks(state: State<'_, AppState>, _app: AppHandle) -> Result<Vec<TaskItem>, String> {
     Ok(state.data.lock().map_err(|e| e.to_string())?.clone())
@@ -180,7 +202,7 @@ fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
     let position = data.tasks.len() as u32;
     let task = TaskItem {
         id: data.next_id, content, completed: false,
-        pinned: false, position,
+        pinned: false, persist: false, position,
         reminder_type, reminder_data, last_reminded: None,
         created_at: Local::now().format("%Y-%m-%dT%H:%M:%S").to_string(),
     };
@@ -321,6 +343,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_tasks, add_task, update_task, delete_task, toggle_complete, check_and_notify,
             get_settings, update_settings, pick_directory, reorder_tasks,
+            minimize_window, hide_window,
         ])
         .run(tauri::generate_context!())
         .expect("error running GlassTodo");
