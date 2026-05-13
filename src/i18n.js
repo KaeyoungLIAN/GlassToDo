@@ -6,8 +6,6 @@ export const MONTHS = [
 const i18n = {
   en: {
     appName: "GlassTodo",
-    normal: "Normal",
-    scheduled: "Scheduled",
     whatNeedsDone: "What needs to be done?",
     add: "Add",
     update: "Update",
@@ -39,8 +37,6 @@ const i18n = {
   },
   zh: {
     appName: "玻璃待办",
-    normal: "普通",
-    scheduled: "定时",
     whatNeedsDone: "需要做什么？",
     add: "添加",
     update: "更新",
@@ -59,7 +55,7 @@ const i18n = {
     defaultLocation: "默认（应用数据）",
     close: "关闭",
     deletePrefix: "已删除",
-    sun: "日", mon: "一", tue: "二", wed: "三", thu: "四", fri: "五", sat: "六",
+    sun: "星期日", mon: "星期一", tue: "星期二", wed: "星期三", thu: "星期四", fri: "星期五", sat: "星期六",
     noTasks: "暂无任务",
     noTasksHint: "在上方输入并按回车添加",
     showCompleted: "显示已完成任务",
@@ -72,8 +68,6 @@ const i18n = {
   },
   ja: {
     appName: "グラスTodo",
-    normal: "通常",
-    scheduled: "予定",
     whatNeedsDone: "何をしますか？",
     add: "追加",
     update: "更新",
@@ -118,6 +112,13 @@ export function t(lang, key) {
 
 export function weekdayNames(lang) {
   return ["sun", "mon", "tue", "wed", "thu", "fri", "sat"].map((k) => t(lang, k));
+}
+
+/** Day labels for the weekly picker buttons — short form */
+export function dayLabels(lang) {
+  if (lang === "zh") return ["一","二","三","四","五","六","日"];
+  if (lang === "ja") return ["月","火","水","木","金","土","日"];
+  return ["M","T","W","T","F","S","S"]; // en default
 }
 
 export function availableLangs() {
