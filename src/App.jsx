@@ -100,12 +100,12 @@ export default function App() {
     async (content, rtype, rdata) => {
       try {
         if (editingId !== null) {
-          const t = tasks.find((x) => x.id === editingId);
-          if (t) {
-            t.content = content;
-            t.reminder_type = rtype;
-            t.reminder_data = rdata;
-            await invoke("update_task", { task: t });
+          const task = tasks.find((x) => x.id === editingId);
+          if (task) {
+            task.content = content;
+            task.reminder_type = rtype;
+            task.reminder_data = rdata;
+            await invoke("update_task", { task });
           }
           setEditingId(null);
           showToast(t(lang, "taskUpdated"));
