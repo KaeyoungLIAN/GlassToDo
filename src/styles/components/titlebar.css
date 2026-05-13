@@ -43,3 +43,57 @@
 
 #settings-btn:hover { background: var(--bg-glass-hover); color: var(--text-primary); transform: translateY(-1px) }
 #settings-btn:hover svg { animation: gear-wiggle 400ms cubic-bezier(0.16, 1, 0.3, 1) }
+
+/* ── Help button ── */
+.help-btn { pointer-events: auto; font-size: 13px; font-weight: 600; width: 22px; height: 22px; border-radius: 50%; color: var(--text-tertiary) }
+.help-btn:hover { background: var(--bg-glass-hover); color: var(--accent) }
+
+/* ── Help popover ── */
+.help-popover {
+  position: absolute; top: 36px; left: 10px; z-index: 100;
+  background: rgba(18, 18, 24, 0.92);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  min-width: 240px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 var(--border-glass-inner);
+  transform-origin: 6px 0;
+}
+.help-popover.open {
+  animation: help-in 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.help-popover.closing {
+  animation: help-out 150ms cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+@keyframes help-in {
+  from { opacity: 0; transform: scale(0.25) rotate(4deg) }
+  to   { opacity: 1; transform: scale(1) rotate(0deg) }
+}
+@keyframes help-out {
+  from { opacity: 1; transform: scale(1) rotate(0deg) }
+  to   { opacity: 0; transform: scale(0.25) rotate(4deg) }
+}
+.help-popover-title {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 6px;
+}
+.help-popover-list { display: flex; flex-direction: column; gap: 3px }
+.help-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text-secondary); padding: 2px 4px;
+  border-radius: 3px; transition: background var(--transition-fast);
+}
+.help-item:hover { background: var(--bg-glass-hover); color: var(--text-primary) }
+.help-icon { flex-shrink: 0; opacity: 0.6 }
+.help-item:hover .help-icon { opacity: 1 }
+.help-popover-footer {
+  margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-glass);
+  font-size: 10px; color: var(--text-muted); line-height: 1.5;
+}
+.help-key {
+  display: inline-block; padding: 0 4px; height: 16px; line-height: 16px;
+  background: var(--bg-surface); border: 1px solid var(--border-glass);
+  border-radius: 3px; font-size: 9px; font-weight: 500; color: var(--text-tertiary);
+  font-family: inherit;
+}

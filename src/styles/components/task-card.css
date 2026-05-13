@@ -33,7 +33,7 @@
   border-radius: 5px; cursor: pointer; flex-shrink: 0; position: relative;
   transition: border-color 200ms var(--ease-out), background 200ms var(--ease-out), transform 150ms var(--ease-out);
 }
-.task-checkbox:hover { border-color: var(--accent); transform: scale(1.08) }
+.task-checkbox:hover { border-color: var(--accent) }
 .task-checkbox:active { transform: scale(0.85) }
 .task-checkbox:checked { background: var(--accent); border-color: var(--accent) }
 .task-checkbox:checked::after {
@@ -75,8 +75,8 @@
 
 /* ── Persist button (daily repeat) ── */
 .persist-btn { color: var(--text-muted) }
-.persist-btn.active { color: #f59e0b }
-.persist-btn:hover { background: rgba(245,158,11,0.12); color: #f59e0b; transform: translateY(-1px) !important }
+.persist-btn.active { color: var(--accent) }
+.persist-btn:hover { background: var(--accent-dim); color: var(--accent); transform: translateY(-1px) !important }
 .persist-btn:active { transform: scale(0.85) translateY(0) !important }
 
 /* ── Reorder buttons ── */
