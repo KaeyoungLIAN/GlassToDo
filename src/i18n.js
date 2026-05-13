@@ -33,6 +33,9 @@ const i18n = {
     searchPlaceholder: "Search tasks...",
     yesterday: "Yesterday",
     thisWeek: "This week",
+    theme: "Theme",
+    dark: "Dark",
+    light: "Light",
   },
   zh: {
     appName: "玻璃待办",
@@ -68,6 +71,9 @@ const i18n = {
     searchPlaceholder: "搜索任务...",
     yesterday: "昨日完成",
     thisWeek: "本周完成",
+    theme: "主题",
+    dark: "深色",
+    light: "浅色",
   },
 
 };

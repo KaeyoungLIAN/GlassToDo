@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { t, availableLangs } from "../i18n";
 
 export default function SettingsModal({ lang, showCompleted, onClose, onSettingsChange }) {
-  const [settings, setSettings] = useState({ language: lang, data_dir: null, show_completed: true });
+  const [settings, setSettings] = useState({ language: lang, theme: "dark", data_dir: null, show_completed: true });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,11 +18,15 @@ export default function SettingsModal({ lang, showCompleted, onClose, onSettings
   const update = async (updated) => {
     setSettings(updated);
     await invoke("update_settings", { settings: updated }).catch(console.error);
-    onSettingsChange(updated.language, updated.data_dir, updated.show_completed);
+    onSettingsChange(updated.language, updated.theme, updated.data_dir, updated.show_completed);
   };
 
   const handleLangChange = (code) => {
     update({ ...settings, language: code });
+  };
+
+  const handleThemeChange = (t) => {
+    update({ ...settings, theme: t });
   };
 
   const handlePickDir = async () => {
@@ -81,6 +85,25 @@ export default function SettingsModal({ lang, showCompleted, onClose, onSettings
                   {l.name}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Theme */}
+          <div className="settings-field">
+            <label className="settings-label">{t(settings.language, "theme")}</label>
+            <div className="settings-lang-options">
+              <button
+                className={`lang-btn${settings.theme === "dark" ? " active" : ""}`}
+                onClick={() => handleThemeChange("dark")}
+              >
+                {t(settings.language, "dark")}
+              </button>
+              <button
+                className={`lang-btn${settings.theme === "light" ? " active" : ""}`}
+                onClick={() => handleThemeChange("light")}
+              >
+                {t(settings.language, "light")}
+              </button>
             </div>
           </div>
 

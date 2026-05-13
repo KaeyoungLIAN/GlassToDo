@@ -21,6 +21,7 @@
   --danger-dim: rgba(239, 68, 68, 0.12);
   --scrollbar-bg: rgba(255, 255, 255, 0.03);
   --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --body-bg: rgba(12, 12, 16, 0.40);
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
@@ -31,13 +32,39 @@
   --transition-slow: 400ms var(--ease-spring);
 }
 
+.theme-light {
+  --bg-base: #f0f0f2;
+  --bg-surface: rgba(240, 240, 244, 0.85);
+  --bg-glass: rgba(255, 255, 255, 0.72);
+  --bg-glass-hover: rgba(255, 255, 255, 0.88);
+  --bg-input: rgba(210, 210, 218, 0.55);
+  --bg-day-btn: rgba(0, 0, 0, 0.06);
+  --bg-day-btn-hover: rgba(0, 0, 0, 0.10);
+  --bg-modal: rgba(236, 236, 242, 0.94);
+  --border-glass: rgba(0, 0, 0, 0.10);
+  --border-glass-inner: rgba(255, 255, 255, 0.55);
+  --border-active: #10b981;
+  --accent: #059669;
+  --accent-hover: #10b981;
+  --accent-dim: rgba(5, 150, 105, 0.12);
+  --text-primary: #16161a;
+  --text-secondary: #55555c;
+  --text-tertiary: #6e6e76;
+  --text-muted: #84848c;
+  --danger: #dc2626;
+  --danger-dim: rgba(220, 38, 38, 0.10);
+  --scrollbar-bg: rgba(0, 0, 0, 0.03);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.12);
+  --body-bg: rgba(240, 240, 244, 0.50);
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box }
 
 html { background: transparent }
 
 body {
   font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: rgba(12, 12, 16, 0.40);
+  background: var(--body-bg);
   color: var(--text-primary);
   height: 100dvh;
   display: flex;

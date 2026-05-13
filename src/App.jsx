@@ -31,6 +31,7 @@ export default function App() {
   const [completingId, setCompletingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [theme, setTheme] = useState("dark");
   const undoTimerRef = useRef(null);
 
   const showToast = useCallback((msg) => {
@@ -51,6 +52,7 @@ export default function App() {
     invoke("get_settings")
       .then((s) => {
         if (s.language) setLang(s.language);
+        if (s.theme) setTheme(s.theme);
         if (s.show_completed !== undefined) setShowCompleted(s.show_completed);
       })
       .catch((e) => console.error("get_settings:", e));
@@ -61,6 +63,11 @@ export default function App() {
 
   // Sync html lang attribute with current language
   useEffect(() => { document.documentElement.lang = lang === "zh" ? "zh-CN" : "en"; }, [lang]);
+
+  // Sync theme class on html element
+  useEffect(() => {
+    document.documentElement.classList.toggle("theme-light", theme === "light");
+  }, [theme]);
 
   // ── filtering ──
   const dateStr = fmt(currentDate);
@@ -270,8 +277,9 @@ export default function App() {
     loadTasks();
   }, [loadTasks]);
 
-  const handleSettingsChange = useCallback((newLang, _dataDir, showComp) => {
+  const handleSettingsChange = useCallback((newLang, newTheme, _dataDir, showComp) => {
     setLang(newLang);
+    if (newTheme) setTheme(newTheme);
     if (showComp !== undefined) setShowCompleted(showComp);
   }, []);
 

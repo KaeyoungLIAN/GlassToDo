@@ -36,6 +36,7 @@ pub struct TodoData { pub tasks: Vec<TaskItem>, pub next_id: u32 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
     pub language: String,
+    pub theme: String,
     pub data_dir: Option<String>,
     #[serde(default = "default_true")]
     pub show_completed: bool,
@@ -47,6 +48,7 @@ impl Default for Settings {
     fn default() -> Self {
         Settings {
             language: "en".to_string(),
+            theme: "dark".to_string(),
             data_dir: None,
             show_completed: true,
         }
