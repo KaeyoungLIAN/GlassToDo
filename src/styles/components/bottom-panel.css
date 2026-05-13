@@ -33,7 +33,7 @@
 #add-btn.editing:active { transform: scale(0.96) translateY(0) }
 
 /* ── Mode toggle pills ── */
-#mode-toggle { display: flex; gap: 4px; padding: 6px 0 0 }
+#mode-toggle { display: flex; gap: 4px; padding: 6px 0 4px }
 
 .mode-pill {
   display: flex; align-items: center; gap: 4px;
@@ -48,55 +48,50 @@
 .mode-pill.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(16, 185, 129, 0.25) }
 .mode-pill svg { flex-shrink: 0 }
 
-/* ── Collapsible reminder ── */
+/* ── Collapse reveal (grid-rows transition) ── */
 #reminder-collapse {
   display: grid; grid-template-rows: 0fr;
-  transition: grid-template-rows 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: grid-template-rows 350ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 #reminder-collapse.open { grid-template-rows: 1fr }
 #reminder-inner { overflow: hidden }
+#reminder-collapse.open #reminder-inner { overflow: visible }
 
-#reminder-summary {
-  display: flex; align-items: center; gap: 5px; width: 100%;
-  padding: 5px 8px; margin-top: 6px; background: var(--bg-input);
-  border: 1px solid transparent; border-radius: var(--radius-sm);
-  color: var(--text-tertiary); font-size: 11px; font-family: inherit;
-  cursor: pointer; transition: background 150ms, border-color 150ms, color 150ms, transform 150ms;
+/* ── Scheduled row: segmented control + inline pickers ── */
+#scheduled-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 2px 0 0; min-height: 0;
 }
-#reminder-summary:hover { background: var(--bg-glass-hover); border-color: var(--border-glass); color: var(--text-secondary); transform: translateY(-1px) }
-#reminder-summary:active { transform: scale(0.99) translateY(0) }
-#reminder-summary-icon { display: flex; align-items: center; opacity: 0.5; flex-shrink: 0 }
-#reminder-summary-text { flex: 1; text-align: left; letter-spacing: 0.01em }
-#reminder-chevron { flex-shrink: 0; transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1); opacity: 0.4 }
-#reminder-summary.options-open #reminder-chevron { transform: rotate(180deg) }
 
-/* ── Inline rtype pills + pickers row ── */
-#reminder-row { display: flex; align-items: center; gap: 8px; padding: 8px 0 4px }
-
-#rtype-toggle { display: flex; gap: 2px; flex-shrink: 0 }
-
-.rtype-pill {
-  padding: 4px 10px; background: var(--bg-input);
-  border: 1px solid transparent; border-radius: 5px;
-  color: var(--text-tertiary); font-size: 11px; font-weight: 500;
-  font-family: inherit; cursor: pointer;
-  transition: background 150ms, color 150ms, border-color 150ms, transform 150ms;
+/* ── Segmented control (One-time / Weekly) ── */
+.segmented {
+  display: flex; border: 1px solid var(--border-glass);
+  border-radius: 6px; overflow: hidden; flex-shrink: 0;
 }
-.rtype-pill:hover { background: var(--bg-glass-hover); color: var(--text-secondary); transform: translateY(-1px) }
-.rtype-pill:active { transform: scale(0.96) translateY(0) }
-.rtype-pill.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(16, 185, 129, 0.25) }
+.seg-btn {
+  padding: 4px 12px; font-size: 11px; font-weight: 500;
+  background: var(--bg-input); color: var(--text-tertiary);
+  border: none; cursor: pointer; font-family: inherit;
+  transition: background 150ms, color 150ms;
+  position: relative;
+}
+.seg-btn + .seg-btn { border-left: 1px solid var(--border-glass) }
+.seg-btn:hover { background: var(--bg-glass-hover); color: var(--text-secondary) }
+.seg-btn.active { background: var(--accent-dim); color: var(--accent); z-index: 1 }
 
-.rtype-pickers { display: flex; align-items: center; gap: 6px; flex: 1 }
+/* ── Picker line ── */
+.picker-line { display: flex; align-items: center; gap: 6px }
 .picker-sep { font-size: 12px; color: var(--text-muted); flex-shrink: 0 }
 
-#day-picker { display: flex; gap: 4px }
+#day-picker { display: flex; gap: 3px }
 
 .day-btn {
-  width: 26px; height: 26px; background: var(--bg-day-btn);
-  border: 1px solid transparent; border-radius: 5px;
-  color: var(--text-tertiary); font-size: 11px; font-weight: 600;
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  width: 24px; height: 24px; background: var(--bg-day-btn);
+  border: 1px solid transparent; border-radius: 4px;
+  color: var(--text-tertiary); font-size: 10px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  transition: background var(--transition-fast), color var(--transition-fast),
+              border-color var(--transition-fast), transform var(--transition-fast);
 }
 .day-btn:hover { background: var(--bg-day-btn-hover); color: var(--text-primary); transform: translateY(-1px) }
 .day-btn:active { transform: scale(0.9) translateY(0) }

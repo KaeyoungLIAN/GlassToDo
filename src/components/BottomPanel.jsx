@@ -144,7 +144,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
           </svg>
-          <span>Normal</span>
+          <span>{t(lang, "normal")}</span>
         </button>
         <button
           className={"mode-pill" + (taskMode === "scheduled" ? " active" : "")}
@@ -155,56 +155,36 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
             <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
             <line x1="3" y1="10" x2="21" y2="10" />
           </svg>
-          <span>Scheduled</span>
+          <span>{t(lang, "scheduled")}</span>
         </button>
       </div>
 
-      {/* Scheduled reminder options — collapsible */}
+      {/* Scheduled options — inline segmented control + pickers */}
       <div id="reminder-collapse" className={taskMode === "scheduled" ? "open" : ""}>
         <div id="reminder-inner">
-            <button
-              id="reminder-summary"
-              className={expanded ? "options-open" : ""}
-              onClick={() => setExpanded(!expanded)}
-              aria-label="Toggle reminder options"
-            >
-            <span id="reminder-summary-icon">{summaryIcon}</span>
-            <span id="reminder-summary-text">{summaryLabel}</span>
-            <svg
-              id="reminder-chevron"
-              width="12" height="12"
-              viewBox="0 0 24 24"
-              fill="none" stroke="currentColor"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-
-          <div id="reminder-options" className={expanded ? "open" : ""}>
-          <div id="reminder-row">
-            <div id="rtype-toggle">
+          <div id="scheduled-row">
+            <div id="seg-type" className="segmented">
               <button
-                className={"rtype-pill" + (rtype === "once" ? " active" : "")}
+                className={"seg-btn" + (rtype === "once" ? " active" : "")}
                 onClick={() => setRtype("once")}
               >
                 {t(lang, "oneTime")}
               </button>
               <button
-                className={"rtype-pill" + (rtype === "weekly" ? " active" : "")}
+                className={"seg-btn" + (rtype === "weekly" ? " active" : "")}
                 onClick={() => setRtype("weekly")}
               >
                 {t(lang, "weekly")}
               </button>
             </div>
             {rtype === "once" ? (
-              <div className="rtype-pickers">
+              <div className="picker-line">
                 <DatePicker value={onceDate} onChange={setOnceDate} lang={lang} />
                 <span className="picker-sep">–</span>
                 <TimePicker value={onceTime} onChange={setOnceTime} />
               </div>
             ) : (
-              <div className="rtype-pickers">
+              <div className="picker-line">
                 <div id="day-picker">
                   {DAYS.map((d) => (
                     <button
@@ -219,7 +199,6 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
                 <TimePicker value={weeklyTime} onChange={setWeeklyTime} />
               </div>
             )}
-          </div>
           </div>
         </div>
       </div>
