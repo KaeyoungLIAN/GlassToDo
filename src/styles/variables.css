@@ -33,6 +33,8 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box }
 
+html { background: transparent; border-radius: 16px; overflow: hidden }
+
 body {
   font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   background: rgba(12, 12, 16, 0.40);
