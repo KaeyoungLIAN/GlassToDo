@@ -86,8 +86,8 @@ export default function App() {
         if (completingId === t.id) return true;
         if (!showCompleted && t.completed) return false;
         if (q && !t.content.toLowerCase().includes(q)) return false;
-        const td = taskDate(t);
-        return td === dateStr || t.reminder_type === "weekly" || t.persist;
+        return t.completed || t.reminder_type === "weekly" ||
+          (t.reminder_data.datetime && t.reminder_data.datetime.startsWith(dateStr));
       }
     )
     .sort((a, b) => {
@@ -102,14 +102,10 @@ export default function App() {
         if (editingId !== null) {
           const t = tasks.find((x) => x.id === editingId);
           if (t) {
-            await invoke("update_task", {
-              task: {
-                ...t,
-                content,
-                reminder_type: rtype,
-                reminder_data: rdata,
-              },
-            });
+            t.content = content;
+            t.reminder_type = rtype;
+            t.reminder_data = rdata;
+            await invoke("update_task", { task: t });
           }
           setEditingId(null);
           showToast(t(lang, "taskUpdated"));
@@ -124,7 +120,6 @@ export default function App() {
         await loadTasks();
       } catch (e) {
         showToast(t(lang, "error") + ": " + String(e));
-        await loadTasks(); // Refresh even on error
       }
     },
     [editingId, tasks, loadTasks, showToast, lang]
@@ -215,19 +210,6 @@ export default function App() {
     [tasks, loadTasks]
   );
 
-  const togglePersist = useCallback(
-    async (id) => {
-      try {
-        const t = tasks.find((x) => x.id === id);
-        if (t) {
-          await invoke("update_task", { task: { ...t, persist: !t.persist } });
-          await loadTasks();
-        }
-      } catch (_) {}
-    },
-    [tasks, loadTasks]
-  );
-
   const handleReorder = useCallback(
     async (ids) => {
       try {
@@ -263,6 +245,7 @@ export default function App() {
         onOpenSettings={() => setShowSettings(true)}
         showSearch={showSearch}
         onToggleSearch={() => setShowSearch((s) => !s)}
+        lang={lang}
       />
       <DateBar
         dateStr={dateStr}
@@ -295,17 +278,13 @@ export default function App() {
           )}
         </div>
       )}
-      {/* Stats row */}
-      {!showSearch && (
+      {(yesterdayCompleted > 0 || weekCompleted > 0) && !showSearch && (
         <div className="stats-line">
-          {(yesterdayCompleted > 0 || weekCompleted > 0) && (
-            <>
-              {yesterdayCompleted > 0 && <span>{t(lang, "yesterday")} {yesterdayCompleted}</span>}
-              {yesterdayCompleted > 0 && weekCompleted > 0 && <span className="stats-dot">·</span>}
-              {weekCompleted > 0 && <span>{t(lang, "thisWeek")} {weekCompleted}</span>}
-            </>
-          )}
-        </div>)}
+          {yesterdayCompleted > 0 && <span>{t(lang, "yesterday")} {yesterdayCompleted}</span>}
+          {yesterdayCompleted > 0 && weekCompleted > 0 && <span className="stats-dot">·</span>}
+          {weekCompleted > 0 && <span>{t(lang, "thisWeek")} {weekCompleted}</span>}
+        </div>
+      )}
       <TaskList
         tasks={filtered}
         onToggle={toggleComplete}
@@ -319,7 +298,6 @@ export default function App() {
         lang={lang}
         deletingId={deletingId}
         completingId={completingId}
-        onTogglePersist={togglePersist}
       />
       <BottomPanel
         editingId={editingId}

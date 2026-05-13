@@ -14,8 +14,6 @@
 
 #title-left { display: flex; align-items: center; gap: 8px; pointer-events: none }
 
-#title-drag { flex: 1; height: 100%; min-width: 20px }
-
 #title-dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--accent); opacity: 0.5; flex-shrink: 0
@@ -26,31 +24,31 @@
   text-transform: uppercase; color: var(--text-tertiary); pointer-events: none
 }
 
-#title-controls { display: flex; gap: 2px }
+#title-controls { display: flex; gap: 2px; pointer-events: none }
 
 .title-btn {
   width: 30px; height: 26px; background: transparent; border: none;
   color: var(--text-tertiary); cursor: pointer; border-radius: 4px;
   display: flex; align-items: center; justify-content: center;
-  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast);
   pointer-events: auto;
 }
-.title-btn:hover { background: var(--bg-glass-hover); color: var(--text-primary); transform: translateY(-1px) }
-.title-btn:active { transform: scale(0.92) translateY(0) }
+.title-btn:hover { background: var(--bg-glass-hover); color: var(--text-primary) }
+.title-btn:active { transform: scale(0.92) }
 .title-btn.active { color: var(--accent); background: var(--accent-dim) }
 
-.close-btn:hover { background: var(--danger-dim); color: var(--danger); transform: translateY(-1px) }
+.close-btn:hover { background: var(--danger-dim); color: var(--danger) }
 
-#settings-btn:hover { background: var(--bg-glass-hover); color: var(--text-primary); transform: translateY(-1px) }
+#settings-btn:hover { background: var(--bg-glass-hover); color: var(--text-primary) }
 #settings-btn:hover svg { animation: gear-wiggle 400ms cubic-bezier(0.16, 1, 0.3, 1) }
 
 /* ── Help button ── */
 .help-btn { pointer-events: auto; font-size: 13px; font-weight: 600; width: 22px; height: 22px; border-radius: 50%; color: var(--text-tertiary) }
 .help-btn:hover { background: var(--bg-glass-hover); color: var(--accent) }
 
-/* ── Help popover ── */
+/* ── Help popover (fixed to break out of stacking context) ── */
 .help-popover {
-  position: absolute; top: 36px; left: 10px; z-index: 100;
+  position: fixed; top: 36px; left: 12px; z-index: 1000;
   background: rgba(18, 18, 24, 0.92);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-glass);
