@@ -39,7 +39,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
     }
   }, [editingId]);
 
-  useEffect(() => { if (!onceDate) setOnceDate(dateStr); }, [dateStr]);
+  useEffect(() => { setOnceDate(dateStr); }, [dateStr]);
 
   const toggleDay = (d) => {
     setActiveDays((prev) => {
@@ -74,6 +74,8 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       setActiveDays(new Set());
       setExpanded(false);
       setTaskMode("normal");
+      setOnceDate(dateStr);
+      setOnceTime("14:30");
     }
     inputRef.current?.focus();
   };
