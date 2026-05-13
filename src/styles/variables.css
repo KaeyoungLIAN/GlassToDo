@@ -31,17 +31,11 @@
   --transition-normal: 250ms var(--ease-spring);
   --transition-slow: 400ms var(--ease-spring);
   --body-bg: rgba(12, 12, 16, 0.40);
-  --bg-glow:
-    radial-gradient(ellipse at 20% 10%, rgba(16,185,129,0.08) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 90%, rgba(16,185,129,0.04) 0%, transparent 55%);
 }
 
 /* ── Light theme ── */
 html.theme-light {
   --body-bg: rgba(240, 240, 245, 0.45);
-  --bg-glow:
-    radial-gradient(ellipse at 20% 10%, rgba(16,185,129,0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 90%, rgba(5,150,105,0.02) 0%, transparent 50%);
   --bg-base: #ecedf0;
   --bg-surface: rgba(210, 210, 220, 0.50);
   --bg-glass: rgba(225, 225, 235, 0.40);
@@ -73,7 +67,7 @@ html { background: transparent }
 
 body {
   font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: var(--bg-glow), var(--body-bg);
+  background: var(--body-bg);
   color: var(--text-primary);
   height: 100dvh;
   display: flex;

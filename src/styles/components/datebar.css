@@ -1,5 +1,5 @@
 #datebar {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center;
   padding: 10px 14px 10px;
   background: var(--bg-glass); backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -12,7 +12,7 @@
 
 #datebar-right { display: flex; align-items: center; gap: 8px }
 
-#date-nav { display: flex; align-items: center; gap: 4px }
+#date-nav { flex: 1; display: flex; align-items: center; gap: 4px }
 
 .nav-btn {
   width: 28px; height: 26px; background: transparent; border: none;
