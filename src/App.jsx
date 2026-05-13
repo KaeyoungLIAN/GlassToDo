@@ -87,7 +87,7 @@ export default function App() {
         if (completingId === t.id) return true;
         if (!showCompleted && t.completed) return false;
         if (q && !t.content.toLowerCase().includes(q)) return false;
-        return t.persist || t.completed || t.reminder_type === "weekly" ||
+        return (t.persist && dateStr >= t.created_at.slice(0, 10)) || t.completed || t.reminder_type === "weekly" ||
           (t.reminder_data.datetime && t.reminder_data.datetime.startsWith(dateStr));
       }
     )
