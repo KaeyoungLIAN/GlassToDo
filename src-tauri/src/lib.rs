@@ -36,21 +36,23 @@ pub struct TodoData { pub tasks: Vec<TaskItem>, pub next_id: u32 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
     pub language: String,
-    pub theme: String,
     pub data_dir: Option<String>,
     #[serde(default = "default_true")]
     pub show_completed: bool,
+    #[serde(default = "default_theme")]
+    pub theme: String,
 }
 
 fn default_true() -> bool { true }
+fn default_theme() -> String { "dark".to_string() }
 
 impl Default for Settings {
     fn default() -> Self {
         Settings {
-            language: "en".to_string(),
-            theme: "dark".to_string(),
+            language: "zh".to_string(),
             data_dir: None,
             show_completed: true,
+            theme: "dark".to_string(),
         }
     }
 }
@@ -145,6 +147,8 @@ fn get_settings(app: AppHandle) -> Result<Settings, String> {
 #[tauri::command]
 fn update_settings(app: AppHandle, settings: Settings) -> Result<(), String> {
     let path = settings_path(&app);
+    // If data_dir changed, reload tasks from new location into state
+    let _old = load_settings(&path);
 
     save_settings(&path, &settings)?;
 

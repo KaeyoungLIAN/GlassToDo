@@ -21,8 +21,6 @@
   --danger-dim: rgba(239, 68, 68, 0.12);
   --scrollbar-bg: rgba(255, 255, 255, 0.03);
   --scrollbar-thumb: rgba(255, 255, 255, 0.1);
-  --body-bg: rgba(12, 12, 16, 0.40);
-  --shadow-color: rgba(12, 12, 16, 0.5);
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
@@ -31,33 +29,34 @@
   --transition-fast: 150ms var(--ease-out);
   --transition-normal: 250ms var(--ease-spring);
   --transition-slow: 400ms var(--ease-spring);
+  --body-bg: rgba(12, 12, 16, 0.40);
 }
 
-.theme-light {
-  --bg-base: #f0f0f2;
-  --bg-surface: rgba(240, 240, 244, 0.85);
-  --bg-glass: rgba(255, 255, 255, 0.72);
-  --bg-glass-hover: rgba(255, 255, 255, 0.88);
-  --bg-input: rgba(210, 210, 218, 0.55);
-  --bg-day-btn: rgba(0, 0, 0, 0.06);
+/* ── Light theme ── */
+html.theme-light {
+  --body-bg: rgba(240, 240, 245, 0.45);
+  --bg-base: #ecedf0;
+  --bg-surface: rgba(210, 210, 220, 0.50);
+  --bg-glass: rgba(225, 225, 235, 0.40);
+  --bg-glass-hover: rgba(209, 209, 219, 0.55);
+  --bg-input: rgba(190, 190, 202, 0.35);
+  --bg-day-btn: rgba(0, 0, 0, 0.05);
   --bg-day-btn-hover: rgba(0, 0, 0, 0.10);
-  --bg-modal: rgba(236, 236, 242, 0.94);
-  --border-glass: rgba(0, 0, 0, 0.10);
-  --border-glass-inner: rgba(255, 255, 255, 0.55);
-  --border-active: #10b981;
+  --bg-modal: rgba(236, 236, 242, 0.92);
+  --border-glass: rgba(0, 0, 0, 0.08);
+  --border-glass-inner: rgba(0, 0, 0, 0.05);
+  --border-active: #059669;
   --accent: #059669;
   --accent-hover: #10b981;
   --accent-dim: rgba(5, 150, 105, 0.12);
-  --text-primary: #16161a;
-  --text-secondary: #55555c;
-  --text-tertiary: #6e6e76;
-  --text-muted: #84848c;
+  --text-primary: #1a1a1e;
+  --text-secondary: #3f3f46;
+  --text-tertiary: #71717a;
+  --text-muted: #a1a1aa;
   --danger: #dc2626;
   --danger-dim: rgba(220, 38, 38, 0.10);
   --scrollbar-bg: rgba(0, 0, 0, 0.03);
-  --scrollbar-thumb: rgba(0, 0, 0, 0.12);
-  --body-bg: rgba(240, 240, 244, 0.50);
-  --shadow-color: rgba(0, 0, 0, 0.12);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.10);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box }

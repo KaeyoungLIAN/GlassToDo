@@ -28,10 +28,10 @@ export default function App() {
   const [lang, setLang] = useState("en");
   const [showCompleted, setShowCompleted] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [theme, setTheme] = useState("dark");
   const [completingId, setCompletingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const [theme, setTheme] = useState("dark");
   const undoTimerRef = useRef(null);
 
   const showToast = useCallback((msg) => {
@@ -52,8 +52,8 @@ export default function App() {
     invoke("get_settings")
       .then((s) => {
         if (s.language) setLang(s.language);
-        if (s.theme) setTheme(s.theme);
         if (s.show_completed !== undefined) setShowCompleted(s.show_completed);
+        if (s.theme) setTheme(s.theme);
       })
       .catch((e) => console.error("get_settings:", e));
   }, []);
@@ -61,10 +61,7 @@ export default function App() {
   useEffect(() => { loadTasks(); const iv = setInterval(() => invoke("check_and_notify").catch((e) => console.error("check_and_notify interval:", e)), 60000); return () => clearInterval(iv); }, [loadTasks]);
   useEffect(() => { const cb = () => { if (!document.hidden) loadTasks(); }; document.addEventListener("visibilitychange", cb); return () => document.removeEventListener("visibilitychange", cb); }, [loadTasks]);
 
-  // Sync html lang attribute with current language
-  useEffect(() => { document.documentElement.lang = lang === "zh" ? "zh-CN" : "en"; }, [lang]);
-
-  // Sync theme class on html element
+  // Sync theme to <html> classList
   useEffect(() => {
     document.documentElement.classList.toggle("theme-light", theme === "light");
   }, [theme]);
@@ -97,15 +94,8 @@ export default function App() {
         if (completingId === t.id) return true;
         if (!showCompleted && t.completed) return false;
         if (q && !t.content.toLowerCase().includes(q)) return false;
-        // Persist tasks: show from creation date onwards
-        if (t.persist && dateStr >= t.created_at.slice(0, 10)) return true;
-        // Completed tasks: only on the date they were due
-        if (t.completed && taskDate(t) === dateStr) return true;
-        // Weekly tasks: only on matching weekday
-        if (t.reminder_type === "weekly" && t.reminder_data.days.includes(currentDate.getDay())) return true;
-        // One-time tasks: match their datetime
-        if (t.reminder_data.datetime && t.reminder_data.datetime.startsWith(dateStr)) return true;
-        return false;
+        return (t.persist && dateStr >= t.created_at.slice(0, 10)) || t.completed || t.reminder_type === "weekly" ||
+          (t.reminder_data.datetime && t.reminder_data.datetime.startsWith(dateStr));
       }
     )
     .sort((a, b) => {
@@ -277,10 +267,10 @@ export default function App() {
     loadTasks();
   }, [loadTasks]);
 
-  const handleSettingsChange = useCallback((newLang, newTheme, _dataDir, showComp) => {
+  const handleSettingsChange = useCallback((newLang, _dataDir, showComp, newTheme) => {
     setLang(newLang);
-    if (newTheme) setTheme(newTheme);
     if (showComp !== undefined) setShowCompleted(showComp);
+    if (newTheme) setTheme(newTheme);
   }, []);
 
   return (
@@ -300,8 +290,6 @@ export default function App() {
         onRefresh={handleRefresh}
         onGoToDate={goToDate}
         lang={lang}
-        yesterdayCompleted={yesterdayCompleted}
-        weekCompleted={weekCompleted}
       />
       {showSearch && (
         <div className="search-bar">
@@ -323,6 +311,13 @@ export default function App() {
               </svg>
             </button>
           )}
+        </div>
+      )}
+      {(yesterdayCompleted > 0 || weekCompleted > 0) && !showSearch && (
+        <div className="stats-line">
+          {yesterdayCompleted > 0 && <span>{t(lang, "yesterday")} {yesterdayCompleted}</span>}
+          {yesterdayCompleted > 0 && weekCompleted > 0 && <span className="stats-dot">·</span>}
+          {weekCompleted > 0 && <span>{t(lang, "thisWeek")} {weekCompleted}</span>}
         </div>
       )}
       <TaskList
@@ -354,6 +349,7 @@ export default function App() {
       {showSettings && (
         <SettingsModal
           lang={lang}
+          theme={theme}
           showCompleted={showCompleted}
           onClose={() => setShowSettings(false)}
           onSettingsChange={handleSettingsChange}
