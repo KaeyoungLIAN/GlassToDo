@@ -1,8 +1,3 @@
-export const MONTHS = [
-  "Jan","Feb","Mar","Apr","May","Jun",
-  "Jul","Aug","Sep","Oct","Nov","Dec",
-];
-
 const i18n = {
   en: {
     appName: "GlassTodo",
@@ -131,6 +126,20 @@ export function dayLabels(lang) {
   if (lang === "zh") return ["一","二","三","四","五","六","日"];
   if (lang === "ja") return ["月","火","水","木","金","土","日"];
   return ["M","T","W","T","F","S","S"]; // en default
+}
+
+/** Month names for the DatePicker calendar header */
+export function monthNames(lang) {
+  if (lang === "zh") return ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
+  if (lang === "ja") return ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+  return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+}
+
+/** Short weekday labels in Sun-Sat order for calendar grids */
+export function weekdayShort(lang) {
+  if (lang === "zh") return ["日","一","二","三","四","五","六"];
+  if (lang === "ja") return ["日","月","火","水","木","金","土"];
+  return ["S","M","T","W","T","F","S"];
 }
 
 export function availableLangs() {
