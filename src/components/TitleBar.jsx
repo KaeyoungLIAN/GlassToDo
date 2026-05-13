@@ -2,8 +2,8 @@ import React from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch }) {
-  const handleMin = async () => { try { await invoke("minimize_window"); } catch (_) {} };
-  const handleClose = async () => { try { await invoke("hide_window"); } catch (_) {} };
+  const handleMin = async () => { try { await invoke("minimize_window"); } catch (e) { console.error("minimize:", e); } };
+  const handleClose = async () => { try { await invoke("hide_window"); } catch (e) { console.error("hide:", e); } };
 
   return (
     <div id="titlebar" data-tauri-drag-region>
