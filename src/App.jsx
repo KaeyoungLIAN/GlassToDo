@@ -67,7 +67,7 @@ export default function App() {
       .catch((e) => console.error("get_settings:", e));
   }, []);
 
-  useEffect(() => { loadTasks(); const iv = setInterval(() => invoke("check_and_notify").catch((e) => console.error("check_and_notify interval:", e)), 60000); return () => clearInterval(iv); }, [loadTasks]);
+  useEffect(() => { loadTasks(); const iv = setInterval(loadTasks, 60000); return () => clearInterval(iv); }, [loadTasks]);
   useEffect(() => { const cb = () => { if (!document.hidden) loadTasks(); }; document.addEventListener("visibilitychange", cb); return () => document.removeEventListener("visibilitychange", cb); }, [loadTasks]);
 
   // Sync theme to <html> classList

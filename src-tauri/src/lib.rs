@@ -239,7 +239,14 @@ fn toggle_complete(state: State<'_, AppState>, app: AppHandle, id: u32) -> Resul
     let settings = load_settings(&s_path);
     let path = data_path(&app, &settings);
     let mut data = load_tasks(&path);
-    if let Some(t) = data.tasks.iter_mut().find(|t| t.id == id) { t.completed = !t.completed; }
+    if let Some(t) = data.tasks.iter_mut().find(|t| t.id == id) {
+        t.completed = !t.completed;
+        // For weekly tasks being completed, anchor last_reminded to today's date
+        // so check_and_notify can determine which day it was completed on.
+        if t.completed && t.reminder_type == "weekly" {
+            t.last_reminded = Some(Local::now().format("%Y-%m-%d").to_string());
+        }
+    }
     save_tasks(&path, &data)?;
     *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
     Ok(())
@@ -253,6 +260,17 @@ fn check_and_notify(state: State<'_, AppState>, app: AppHandle) -> Result<Vec<St
     let mut data = load_tasks(&path);
     let now = Local::now(); let mut alerts = vec![];
     let today_wd = now.weekday().num_days_from_sunday() as u8;
+    let today_str = now.format("%Y-%m-%d").to_string();
+
+    // Auto-reset weekly tasks completed on a previous day
+    for t in &mut data.tasks {
+        if t.reminder_type == "weekly" && t.completed {
+            if t.last_reminded.as_deref() != Some(today_str.as_str()) {
+                t.completed = false;
+            }
+        }
+    }
+
     use tauri_plugin_notification::NotificationExt;
     for t in &data.tasks {
         if t.completed { continue; }
