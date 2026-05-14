@@ -319,6 +319,14 @@ fn reorder_tasks(state: State<'_, AppState>, app: AppHandle, ids: Vec<u32>) -> R
 
 struct AppState { data: Mutex<Vec<TaskItem>> }
 
+/// Open a URL using the system protocol handler, bypassing Tauri's shell
+/// plugin scope so that custom protocols like wemeet:// work without
+/// WebView2 security prompts.
+#[tauri::command]
+fn open_url(url: String) -> Result<(), String> {
+    open::that(&url).map_err(|e| format!("Failed to open URL: {}", e))
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_notification::init())
@@ -343,7 +351,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_tasks, add_task, update_task, delete_task, toggle_complete, check_and_notify,
             get_settings, update_settings, pick_directory, reorder_tasks,
-            minimize_window,
+            minimize_window, open_url,
         ])
         .run(tauri::generate_context!())
         .expect("error running GlassTodo");

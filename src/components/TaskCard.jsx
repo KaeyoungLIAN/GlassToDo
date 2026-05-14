@@ -1,5 +1,5 @@
 import React from "react";
-import { open } from "@tauri-apps/plugin-shell";
+import { invoke } from "@tauri-apps/api/core";
 import { t } from "../i18n";
 
 const WN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -84,15 +84,13 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
           onClick={(e) => {
             e.stopPropagation();
             const url = task.link_url;
-            // Tencent Meeting web link: extract code and use wemeet://
+            // Tencent Meeting web link: extract code, use wemeet:// directly
             const txMatch = url.match(/meeting\.tencent\.com\/(?:dm\/)?([a-zA-Z0-9]+)/);
-            const wemeetUrl = txMatch
+            const target = txMatch
               ? `wemeet://page/inmeeting?meeting_code=${txMatch[1]}`
-              : null;
-            const target = wemeetUrl || url;
-            // Try Tauri shell open; if blocked by permissions, fall back to
-            // webview navigation (same effect as typing wemeet:// in browser bar)
-            open(target).catch(() => { window.location.href = target; });
+              : url;
+            // Use our own Tauri command (bypasses shell plugin scope checks)
+            invoke("open_url", { url: target });
           }}
           title={task.link_url}
         >
