@@ -17,7 +17,9 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
   const [onceTime, setOnceTime] = useState("14:30");
   const [activeDays, setActiveDays] = useState(new Set());
   const [weeklyTime, setWeeklyTime] = useState("09:00");
+  const [linkType, setLinkType] = useState("url"); // "url" | "meeting"
   const [linkUrl, setLinkUrl] = useState("");
+  const [meetingCode, setMeetingCode] = useState("");
   const [expanded, setExpanded] = useState(false);
   const inputRef = useRef(null);
   const userSetOnceRef = useRef(false);
@@ -28,7 +30,17 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       setContent(editText);
       setTaskMode("scheduled");
       setRtype(editRtype);
-      setLinkUrl(editLinkUrl || "");
+      // Detect wemeet:// meeting code from saved link_url
+      const wxMatch = (editLinkUrl || "").match(/wemeet:\/\/page\/inmeeting\?meeting_code=([a-zA-Z0-9]+)/);
+      if (wxMatch) {
+        setLinkType("meeting");
+        setMeetingCode(wxMatch[1]);
+        setLinkUrl("");
+      } else {
+        setLinkType("url");
+        setLinkUrl(editLinkUrl || "");
+        setMeetingCode("");
+      }
       if (editRtype === "once" && editRdata?.datetime) {
         const p = editRdata.datetime.split("T");
         setOnceDate(p[0]);
@@ -59,12 +71,19 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       return;
     }
 
+    // Build final link_url: meeting code → wemeet://, else raw URL
+    const finalLinkUrl = linkType === "meeting" && meetingCode.trim()
+      ? `wemeet://page/inmeeting?meeting_code=${meetingCode.trim()}`
+      : linkType === "meeting" ? ""
+      : linkUrl;
+
     if (editingId === null && taskMode === "normal") {
       // Normal task: no reminder, due today
       const rd = { datetime: `${dateStr}T23:59:00`, days: [], time: "09:00" };
       onSave(text, "once", rd);
       setContent("");
       setLinkUrl("");
+      setMeetingCode("");
       inputRef.current?.focus();
       return;
     }
@@ -74,9 +93,10 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       rtype === "once"
         ? { datetime: `${onceDate || dateStr}T${onceTime}:00`, days: [], time: "09:00" }
         : { datetime: null, days: activeDays.size ? [...activeDays] : [1], time: weeklyTime };
-    onSave(text, rtype, rd, linkUrl);
+    onSave(text, rtype, rd, finalLinkUrl);
     setContent("");
     setLinkUrl("");
+    setMeetingCode("");
     if (editingId === null) {
       setRtype("once");
       setActiveDays(new Set());
@@ -192,14 +212,48 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
               </div>
             )}
           </div>
-          <input
-            type="url"
-            className="link-url-input"
-            placeholder={t(lang, "linkPlaceholder")}
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            autoComplete="off"
-          />
+          {/* Link type + input */}
+          <div className="segmented" style={{ marginTop: 8 }}>
+            <button
+              className={"seg-btn" + (linkType === "url" ? " active" : "")}
+              onClick={() => setLinkType("url")}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 3 }}>
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+              Web
+            </button>
+            <button
+              className={"seg-btn" + (linkType === "meeting" ? " active" : "")}
+              onClick={() => setLinkType("meeting")}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 3 }}>
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+              </svg>
+              腾讯会议
+            </button>
+          </div>
+          {linkType === "url" ? (
+            <input
+              type="url"
+              className="link-url-input"
+              placeholder={t(lang, "linkPlaceholder")}
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              autoComplete="off"
+            />
+          ) : (
+            <input
+              type="text"
+              className="link-url-input"
+              placeholder={t(lang, "meetingCode")}
+              value={meetingCode}
+              onChange={(e) => setMeetingCode(e.target.value.replace(/[^a-zA-Z0-9-]/g, ""))}
+              autoComplete="off"
+            />
+          )}
         </div>
       </div>
     </div>

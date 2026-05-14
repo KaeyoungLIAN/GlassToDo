@@ -83,14 +83,8 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
           className="action-btn link-btn"
           onClick={(e) => {
             e.stopPropagation();
-            const url = task.link_url;
-            // Tencent Meeting web link: extract code, use wemeet:// directly
-            const txMatch = url.match(/meeting\.tencent\.com\/(?:dm\/)?([a-zA-Z0-9]+)/);
-            const target = txMatch
-              ? `wemeet://page/inmeeting?meeting_code=${txMatch[1]}`
-              : url;
-            // Use our own Tauri command (bypasses shell plugin scope checks)
-            invoke("open_url", { url: target });
+            // URL is already the final form: wemeet:// for meetings, raw URL otherwise
+            invoke("open_url", { url: task.link_url });
           }}
           title={task.link_url}
         >
