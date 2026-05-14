@@ -204,6 +204,7 @@ fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
         pinned: false, persist: false, position,
         reminder_type, reminder_data, last_reminded: None,
         created_at: Local::now().format("%Y-%m-%dT%H:%M:%S").to_string(),
+        completed_dates: Vec::new(),
     };
     data.next_id += 1; data.tasks.push(task.clone());
     save_tasks(&path, &data)?;
