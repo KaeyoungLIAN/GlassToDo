@@ -81,7 +81,17 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
       {task.link_url && (
         <button
           className="action-btn link-btn"
-          onClick={(e) => { e.stopPropagation(); open(task.link_url); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            const url = task.link_url;
+            // Tencent Meeting: use wemeet:// native protocol for one-click join
+            const txMatch = url.match(/meeting\.tencent\.com\/(?:dm\/)?([a-zA-Z0-9]+)/);
+            if (txMatch) {
+              open(`wemeet://page/inmeeting?meeting_code=${txMatch[1]}`).catch(() => open(url));
+            } else {
+              open(url);
+            }
+          }}
           title={task.link_url}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
