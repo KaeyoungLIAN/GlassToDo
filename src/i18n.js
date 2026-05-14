@@ -42,6 +42,7 @@ const i18n = {
     dark: "Dark",
     light: "Light",
     todayToDo: "Today to-do",
+    linkPlaceholder: "Link URL (meeting / web page)",
   },
   zh: {
     appName: "玻璃待办",
@@ -86,6 +87,7 @@ const i18n = {
     dark: "暗色",
     light: "亮色",
     todayToDo: "今日待完成",
+    linkPlaceholder: "链接地址（会议/网页链接）",
   },
 };
 

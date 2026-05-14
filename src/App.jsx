@@ -21,6 +21,7 @@ export default function App() {
   const [editText, setEditText] = useState("");
   const [editRtype, setEditRtype] = useState("once");
   const [editRdata, setEditRdata] = useState(null);
+  const [editLinkUrl, setEditLinkUrl] = useState("");
   const [toast, setToast] = useState(null);
   const [undoId, setUndoId] = useState(null);
   const [undoContent, setUndoContent] = useState("");
@@ -123,7 +124,7 @@ export default function App() {
 
   // ── CRUD ──
   const addTask = useCallback(
-    async (content, rtype, rdata) => {
+    async (content, rtype, rdata, linkUrl) => {
       try {
         if (editingId !== null) {
           const task = tasks.find((x) => x.id === editingId);
@@ -131,6 +132,7 @@ export default function App() {
             task.content = content;
             task.reminder_type = rtype;
             task.reminder_data = rdata;
+            task.link_url = linkUrl || null;
             await invoke("update_task", { task });
           }
           setEditingId(null);
@@ -140,6 +142,7 @@ export default function App() {
             content,
             reminderType: rtype,
             reminderData: rdata,
+            linkUrl: linkUrl || null,
           });
           showToast(t(lang, "taskAdded"));
         }
@@ -196,6 +199,7 @@ export default function App() {
           content: undoTask.content,
           reminderType: undoTask.reminder_type,
           reminderData: undoTask.reminder_data,
+          linkUrl: undoTask.link_url || null,
         });
         showToast(t(lang, "deleteCancelled"));
       } catch (e) { console.error("add_task (undo):", e); }
@@ -228,6 +232,7 @@ export default function App() {
     setEditText(t.content);
     setEditRtype(t.reminder_type);
     setEditRdata(t.reminder_data);
+    setEditLinkUrl(t.link_url || "");
   }, []);
 
   const cancelEdit = useCallback(() => {
@@ -360,6 +365,7 @@ export default function App() {
         editText={editText}
         editRtype={editRtype}
         editRdata={editRdata}
+        editLinkUrl={editLinkUrl}
         onSave={addTask}
         onCancelEdit={cancelEdit}
         dateStr={dateStr}

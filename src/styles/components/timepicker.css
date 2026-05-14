@@ -48,3 +48,15 @@
 .timepicker-value:active { transform: scale(0.95) }
 
 .timepicker-sep { font-size: 16px; font-weight: 600; color: var(--text-tertiary); align-self: center }
+
+/* ── Link URL input in bottom panel ── */
+.link-url-input {
+  display: block; width: 100%; margin-top: 8px;
+  padding: 6px 10px; box-sizing: border-box;
+  background: var(--bg-input); border: 1px solid var(--border-glass);
+  border-radius: 4px; color: var(--text-primary); font-size: 12px;
+  font-family: inherit; outline: none;
+  transition: border-color 200ms var(--ease-out);
+}
+.link-url-input:focus { border-color: rgba(16, 185, 129, 0.4) }
+.link-url-input::placeholder { color: var(--text-tertiary); opacity: 0.6 }

@@ -9,7 +9,7 @@ function fmt(d) {
 
 const DAY_KEYS = [1, 2, 3, 4, 5, 6, 0];
 
-export default function BottomPanel({ editingId, editText, editRtype, editRdata, onSave, onCancelEdit, dateStr, lang, onEmptySubmit }) {
+export default function BottomPanel({ editingId, editText, editRtype, editRdata, editLinkUrl, onSave, onCancelEdit, dateStr, lang, onEmptySubmit }) {
   const [content, setContent] = useState("");
   const [taskMode, setTaskMode] = useState("normal"); // "normal" | "scheduled"
   const [rtype, setRtype] = useState("once");
@@ -17,6 +17,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
   const [onceTime, setOnceTime] = useState("14:30");
   const [activeDays, setActiveDays] = useState(new Set());
   const [weeklyTime, setWeeklyTime] = useState("09:00");
+  const [linkUrl, setLinkUrl] = useState("");
   const [expanded, setExpanded] = useState(false);
   const inputRef = useRef(null);
   const userSetOnceRef = useRef(false);
@@ -27,6 +28,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       setContent(editText);
       setTaskMode("scheduled");
       setRtype(editRtype);
+      setLinkUrl(editLinkUrl || "");
       if (editRtype === "once" && editRdata?.datetime) {
         const p = editRdata.datetime.split("T");
         setOnceDate(p[0]);
@@ -62,6 +64,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       const rd = { datetime: `${dateStr}T23:59:00`, days: [], time: "09:00" };
       onSave(text, "once", rd);
       setContent("");
+      setLinkUrl("");
       inputRef.current?.focus();
       return;
     }
@@ -71,8 +74,9 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       rtype === "once"
         ? { datetime: `${onceDate || dateStr}T${onceTime}:00`, days: [], time: "09:00" }
         : { datetime: null, days: activeDays.size ? [...activeDays] : [1], time: weeklyTime };
-    onSave(text, rtype, rd);
+    onSave(text, rtype, rd, linkUrl);
     setContent("");
+    setLinkUrl("");
     if (editingId === null) {
       setRtype("once");
       setActiveDays(new Set());
@@ -188,6 +192,14 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
               </div>
             )}
           </div>
+          <input
+            type="url"
+            className="link-url-input"
+            placeholder={t(lang, "linkPlaceholder")}
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            autoComplete="off"
+          />
         </div>
       </div>
     </div>

@@ -28,6 +28,8 @@ pub struct TaskItem {
     pub last_reminded: Option<String>, pub created_at: String,
     #[serde(default)]
     pub completed_dates: Vec<String>,
+    #[serde(default)]
+    pub link_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -193,7 +195,8 @@ fn get_tasks(state: State<'_, AppState>, _app: AppHandle) -> Result<Vec<TaskItem
 
 #[tauri::command]
 fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
-    reminder_type: String, reminder_data: ReminderData) -> Result<TaskItem, String> {
+    reminder_type: String, reminder_data: ReminderData,
+    link_url: Option<String>) -> Result<TaskItem, String> {
     let s_path = settings_path(&app);
     let settings = load_settings(&s_path);
     let path = data_path(&app, &settings);
@@ -205,6 +208,7 @@ fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
         reminder_type, reminder_data, last_reminded: None,
         created_at: Local::now().format("%Y-%m-%dT%H:%M:%S").to_string(),
         completed_dates: Vec::new(),
+        link_url,
     };
     data.next_id += 1; data.tasks.push(task.clone());
     save_tasks(&path, &data)?;
