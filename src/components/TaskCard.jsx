@@ -84,13 +84,15 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
           onClick={(e) => {
             e.stopPropagation();
             const url = task.link_url;
-            // Tencent Meeting: use wemeet:// native protocol for one-click join
+            // Tencent Meeting web link: extract code and use wemeet://
             const txMatch = url.match(/meeting\.tencent\.com\/(?:dm\/)?([a-zA-Z0-9]+)/);
-            if (txMatch) {
-              open(`wemeet://page/inmeeting?meeting_code=${txMatch[1]}`).catch(() => open(url));
-            } else {
-              open(url);
-            }
+            const wemeetUrl = txMatch
+              ? `wemeet://page/inmeeting?meeting_code=${txMatch[1]}`
+              : null;
+            const target = wemeetUrl || url;
+            // Try Tauri shell open; if blocked by permissions, fall back to
+            // webview navigation (same effect as typing wemeet:// in browser bar)
+            open(target).catch(() => { window.location.href = target; });
           }}
           title={task.link_url}
         >
