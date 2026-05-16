@@ -24,6 +24,30 @@
   gap: 8px;
 }
 
+.collapse-bar-pin-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: color 150ms var(--ease-out);
+}
+
+.collapse-bar-pin-btn:hover {
+  color: var(--accent);
+}
+
+.collapse-bar-pin-btn.active {
+  color: var(--accent);
+}
+
 .collapse-bar-logo-circle {
   width: 10px;
   height: 10px;

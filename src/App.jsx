@@ -319,14 +319,26 @@ export default function App() {
   }, [lang]);
 
   // ── Collapse / Mini-mode ──
+  const todayStr = fmt(new Date());
+  const todayDow = new Date().getDay();
+
   const todayRemaining = useMemo(() => {
     return tasks.filter(t => {
+      // Must be visible today (same filter logic as filtered array)
+      const isTodaysTask =
+        (t.persist && !t.completed && todayStr >= t.created_at.slice(0, 10)) ||
+        (t.reminder_type === "weekly" && t.reminder_data.days.includes(todayDow)) ||
+        (t.reminder_data.datetime && t.reminder_data.datetime.startsWith(todayStr));
+      if (!isTodaysTask) return false;
+      // Must be uncompleted for today
       if (t.reminder_type === "weekly") {
-        return !(t.completed_dates || []).includes(dateStr);
+        return !(t.completed_dates || []).includes(todayStr);
       }
       return !t.completed;
     }).length;
-  }, [tasks, dateStr]);
+  }, [tasks, todayStr, todayDow]);
+
+  const [alwaysOnTop, setAlwaysOnTop] = useState(true);
 
   const toggleCollapsed = useCallback(async () => {
     const win = getCurrentWindow();
@@ -334,6 +346,7 @@ export default function App() {
       await win.setMinSize(new LogicalSize(200, 30));
       await win.setSize(new LogicalSize(240, 44));
       await win.setAlwaysOnTop(true);
+      setAlwaysOnTop(true);
       setCollapsed(true);
     } else {
       await win.setSize(new LogicalSize(500, 650));
@@ -342,6 +355,13 @@ export default function App() {
       setCollapsed(false);
     }
   }, [collapsed]);
+
+  const toggleAlwaysOnTop = useCallback(async () => {
+    const win = getCurrentWindow();
+    const newVal = !alwaysOnTop;
+    await win.setAlwaysOnTop(newVal);
+    setAlwaysOnTop(newVal);
+  }, [alwaysOnTop]);
 
   // Keyboard shortcut: ` backtick to collapse/expand
   useEffect(() => {
@@ -360,6 +380,15 @@ export default function App() {
   return collapsed ? (
     <div className="collapse-bar" data-tauri-drag-region onClick={toggleCollapsed}>
       <div className="collapse-bar-left">
+        <button
+          className={"collapse-bar-pin-btn" + (alwaysOnTop ? " active" : "")}
+          onClick={(e) => { e.stopPropagation(); toggleAlwaysOnTop(); }}
+          title={lang === "zh" ? (alwaysOnTop ? "取消置顶" : "置顶") : (alwaysOnTop ? "Disable always on top" : "Always on top")}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill={alwaysOnTop ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z" />
+          </svg>
+        </button>
         <div className="collapse-bar-logo-circle" />
         <span className="collapse-bar-logo-text">GlassTodo</span>
       </div>
