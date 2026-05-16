@@ -359,13 +359,14 @@ export default function App() {
 
   return collapsed ? (
     <div className="collapse-bar" data-tauri-drag-region onClick={toggleCollapsed}>
-      <svg className="collapse-bar-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-      </svg>
-      <span className="collapse-bar-text">
+      <div className="collapse-bar-left">
+        <div className="collapse-bar-logo-circle" />
+        <span className="collapse-bar-logo-text">GlassTodo</span>
+      </div>
+      <div className="collapse-bar-right">
         <span className="collapse-bar-count">{todayRemaining}</span>
-        {lang === "zh" ? " 今日剩余" : todayRemaining === 1 ? " task left today" : " tasks left today"}
-      </span>
+        <span className="collapse-bar-label">{lang === "zh" ? "今日剩余" : todayRemaining === 1 ? "task left today" : "tasks left today"}</span>
+      </div>
     </div>
   ) : (
     <>
@@ -374,6 +375,7 @@ export default function App() {
         showSearch={showSearch}
         onToggleSearch={() => setShowSearch((s) => !s)}
         lang={lang}
+        onToggleCollapsed={toggleCollapsed}
       />
       <DateBar
         dateStr={dateStr}

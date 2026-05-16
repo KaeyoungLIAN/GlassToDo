@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
-export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, lang }) {
+export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, lang, onToggleCollapsed }) {
   const [showHelp, setShowHelp] = useState(false);
   const [helpClosing, setHelpClosing] = useState(false);
   const helpRef = useRef(null);
@@ -63,6 +63,13 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
           <button className="title-btn" id="min-btn" title="Minimize" onClick={handleMin}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+          <button className="title-btn collapse-btn" id="collapse-btn" title={lang === "zh" ? "折叠" : "Collapse"} onClick={onToggleCollapsed}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+              <path d="M12 14l-3 3h6l-3-3z" />
             </svg>
           </button>
           <button className="title-btn close-btn" id="close-btn" title={lang === "zh" ? "关闭" : "Close"} onClick={handleClose}>
