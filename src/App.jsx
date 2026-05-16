@@ -386,7 +386,8 @@ export default function App() {
           title={lang === "zh" ? (alwaysOnTop ? "取消置顶" : "置顶") : (alwaysOnTop ? "Disable always on top" : "Always on top")}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill={alwaysOnTop ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z" />
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" />
           </svg>
         </button>
         <div className="collapse-bar-logo-circle" />

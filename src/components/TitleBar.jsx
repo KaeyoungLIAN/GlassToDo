@@ -92,7 +92,11 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
               <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
               </svg>
-              <span>{lang === "zh" ? "创建任务：底部输入栏打字。[普通]无时间；[定时-单次]选日期时间；[定时-每周]选星期时间" : "Create tasks: Type in the bar. [Normal] no time; [Scheduled-Once] date+time; [Scheduled-Weekly] days+time"}</span>
+              <div className="help-item-content">
+                <div>{lang === "zh" ? "创建任务：底部输入栏打字。任务分为两类" : "Create tasks: Type in the bar. Two types:"}</div>
+                <div className="help-sub-item">{lang === "zh" ? "普通任务：无时间限制，不会到期提醒" : "Normal: No due date, no reminder"}</div>
+                <div className="help-sub-item">{lang === "zh" ? "定时任务：可选单次（日期+时间）或每周（星期+时间），到期自动提醒" : "Scheduled: Once (date+time) or Weekly (day+time), auto-remind"}</div>
+              </div>
             </div>
             <div className="help-item">
               <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -122,7 +126,7 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
               <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
               </svg>
-              <span>{lang === "zh" ? "储留：跨日期可见。配合每周提醒自动循环出现" : "Persist: Visible across dates. Auto-recur with weekly reminder"}</span>
+              <span>{lang === "zh" ? "储留任务：开启后跨日期可见，持续显示直至完成为止" : "Persist: Visible across dates, stays on screen until completed"}</span>
             </div>
             <div className="help-item">
               <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -135,6 +139,18 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
                 <path d="M7 10l5-5 5 5" /><path d="M7 14l5 5 5-5" />
               </svg>
               <span>{lang === "zh" ? "调整顺序：点卡片左侧上下箭头，顺序持久保存" : "Reorder: Up/down arrows on card. Order is saved"}</span>
+            </div>
+            <div className="help-item">
+              <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><path d="M12 14l-3 3h6l-3-3z" />
+              </svg>
+              <span>{lang === "zh" ? "折叠窗口：点标题栏折叠按钮或按反引号键(`)折叠为迷你条；点迷你条或再按反引号展开" : "Collapse: Click collapse button or press ` to mini-bar; click bar or press ` again to restore"}</span>
+            </div>
+            <div className="help-item">
+              <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
+              </svg>
+              <span>{lang === "zh" ? "置顶开关：折叠状态下点左侧大头针按钮切换窗口置顶/不置顶" : "Always on top: While collapsed, click the pin button on the left to toggle always-on-top"}</span>
             </div>
             <div className="help-item">
               <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -81,6 +81,17 @@
 .help-item:hover { background: var(--bg-glass-hover); color: var(--text-primary) }
 .help-icon { flex-shrink: 0; opacity: 0.75 }
 .help-item:hover .help-icon { opacity: 1 }
+.help-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.4;
+}
+.help-sub-item {
+  padding-left: 10px;
+  color: var(--text-tertiary);
+  font-size: 10.5px;
+}
 .help-popover-footer {
   margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-glass);
   font-size: 10px; color: var(--text-muted); line-height: 1.5;
