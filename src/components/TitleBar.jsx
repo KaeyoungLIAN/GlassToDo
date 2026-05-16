@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
-export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, lang, onToggleCollapsed }) {
+export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, lang }) {
   const [showHelp, setShowHelp] = useState(false);
   const [helpClosing, setHelpClosing] = useState(false);
   const helpRef = useRef(null);
@@ -63,13 +63,6 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
           <button className="title-btn" id="min-btn" title="Minimize" onClick={handleMin}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </button>
-          <button className="title-btn collapse-btn" id="collapse-btn" title={lang === "zh" ? "折叠" : "Collapse"} onClick={onToggleCollapsed}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <line x1="3" y1="9" x2="21" y2="9" />
-              <path d="M12 14l-3 3h6l-3-3z" />
             </svg>
           </button>
           <button className="title-btn close-btn" id="close-btn" title={lang === "zh" ? "关闭" : "Close"} onClick={handleClose}>
@@ -139,18 +132,6 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
                 <path d="M7 10l5-5 5 5" /><path d="M7 14l5 5 5-5" />
               </svg>
               <span>{lang === "zh" ? "调整顺序：点卡片左侧上下箭头，顺序持久保存" : "Reorder: Up/down arrows on card. Order is saved"}</span>
-            </div>
-            <div className="help-item">
-              <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><path d="M12 14l-3 3h6l-3-3z" />
-              </svg>
-              <span>{lang === "zh" ? "折叠窗口：点标题栏折叠按钮或按反引号键(`)折叠为迷你条；点迷你条或再按反引号展开" : "Collapse: Click collapse button or press ` to mini-bar; click bar or press ` again to restore"}</span>
-            </div>
-            <div className="help-item">
-              <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
-              </svg>
-              <span>{lang === "zh" ? "置顶开关：折叠状态下点左侧大头针按钮切换窗口置顶/不置顶" : "Always on top: While collapsed, click the pin button on the left to toggle always-on-top"}</span>
             </div>
             <div className="help-item">
               <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

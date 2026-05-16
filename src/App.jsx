@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import TitleBar from "./components/TitleBar";
 import DateBar from "./components/DateBar";
 import TaskList from "./components/TaskList";
@@ -38,7 +37,6 @@ export default function App() {
   const [showSearch, setShowSearch] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
   const undoTimerRef = useRef(null);
 
   const showToast = useCallback((msg) => {
@@ -318,94 +316,13 @@ export default function App() {
     setTimeout(() => setToast(null), 2500);
   }, [lang]);
 
-  // ── Collapse / Mini-mode ──
-  const todayStr = fmt(new Date());
-  const todayDow = new Date().getDay();
-
-  const todayRemaining = useMemo(() => {
-    return tasks.filter(t => {
-      // Must be visible today (same filter logic as filtered array)
-      const isTodaysTask =
-        (t.persist && !t.completed && todayStr >= t.created_at.slice(0, 10)) ||
-        (t.reminder_type === "weekly" && t.reminder_data.days.includes(todayDow)) ||
-        (t.reminder_data.datetime && t.reminder_data.datetime.startsWith(todayStr));
-      if (!isTodaysTask) return false;
-      // Must be uncompleted for today
-      if (t.reminder_type === "weekly") {
-        return !(t.completed_dates || []).includes(todayStr);
-      }
-      return !t.completed;
-    }).length;
-  }, [tasks, todayStr, todayDow]);
-
-  const [alwaysOnTop, setAlwaysOnTop] = useState(true);
-
-  const toggleCollapsed = useCallback(async () => {
-    const win = getCurrentWindow();
-    if (!collapsed) {
-      await win.setMinSize(new LogicalSize(200, 30));
-      await win.setSize(new LogicalSize(240, 44));
-      await win.setAlwaysOnTop(true);
-      setAlwaysOnTop(true);
-      setCollapsed(true);
-    } else {
-      await win.setSize(new LogicalSize(500, 650));
-      await win.setMinSize(new LogicalSize(400, 400));
-      await win.setAlwaysOnTop(false);
-      setCollapsed(false);
-    }
-  }, [collapsed]);
-
-  const toggleAlwaysOnTop = useCallback(async () => {
-    const win = getCurrentWindow();
-    const newVal = !alwaysOnTop;
-    await win.setAlwaysOnTop(newVal);
-    setAlwaysOnTop(newVal);
-  }, [alwaysOnTop]);
-
-  // Keyboard shortcut: ` backtick to collapse/expand
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.key === "`" || e.code === "Backquote") {
-        const tag = document.activeElement?.tagName;
-        if (tag === "INPUT" || tag === "TEXTAREA") return;
-        e.preventDefault();
-        toggleCollapsed();
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [toggleCollapsed]);
-
-  return collapsed ? (
-    <div className="collapse-bar" data-tauri-drag-region onClick={toggleCollapsed}>
-      <div className="collapse-bar-left">
-        <button
-          className={"collapse-bar-pin-btn" + (alwaysOnTop ? " active" : "")}
-          onClick={(e) => { e.stopPropagation(); toggleAlwaysOnTop(); }}
-          title={lang === "zh" ? (alwaysOnTop ? "取消置顶" : "置顶") : (alwaysOnTop ? "Disable always on top" : "Always on top")}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill={alwaysOnTop ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-            <circle cx="12" cy="10" r="3" />
-          </svg>
-        </button>
-        <div className="collapse-bar-logo-circle" />
-        <span className="collapse-bar-logo-text">GlassTodo</span>
-      </div>
-      <div className="collapse-bar-right">
-        <span className="collapse-bar-count">{todayRemaining}</span>
-        <span className="collapse-bar-label">{lang === "zh" ? "今日剩余" : todayRemaining === 1 ? "task left today" : "tasks left today"}</span>
-      </div>
-    </div>
-  ) : (
+  return (
     <>
       <TitleBar
         onOpenSettings={() => setShowSettings(true)}
         showSearch={showSearch}
         onToggleSearch={() => setShowSearch((s) => !s)}
         lang={lang}
-        onToggleCollapsed={toggleCollapsed}
       />
       <DateBar
         dateStr={dateStr}
