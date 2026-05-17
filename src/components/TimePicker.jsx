@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { t } from "../i18n";
 
 /**
  * TimePicker — Custom time picker replacing <input type="time">
  * Props: value (string "HH:MM"), onChange (fn)
  */
-export default function TimePicker({ value, onChange }) {
+export default function TimePicker({ value, onChange, lang }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const prevOpenRef = useRef(false);
@@ -81,7 +82,7 @@ export default function TimePicker({ value, onChange }) {
         type="button"
         className="timepicker-trigger"
         onClick={() => setOpen((v) => !v)}
-        aria-label="Pick time"
+        aria-label={t(lang, "pickTime")}
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
@@ -99,7 +100,7 @@ export default function TimePicker({ value, onChange }) {
                 type="button"
                 className="timepicker-arrow"
                 onClick={() => setEditHour((h) => wrapInc(h, 24))}
-                aria-label="Increase hour"
+                aria-label={t(lang, "increaseHour")}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="18 15 12 9 6 15" />
@@ -114,7 +115,7 @@ export default function TimePicker({ value, onChange }) {
                 type="button"
                 className="timepicker-arrow"
                 onClick={() => setEditHour((h) => wrapDec(h, 24))}
-                aria-label="Decrease hour"
+                aria-label={t(lang, "decreaseHour")}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="6 9 12 15 18 9" />
@@ -130,7 +131,7 @@ export default function TimePicker({ value, onChange }) {
                 type="button"
                 className="timepicker-arrow"
                 onClick={() => setEditMin((m) => wrapInc(m, 60))}
-                aria-label="Increase minute"
+                aria-label={t(lang, "increaseMinute")}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="18 15 12 9 6 15" />
@@ -145,7 +146,7 @@ export default function TimePicker({ value, onChange }) {
                 type="button"
                 className="timepicker-arrow"
                 onClick={() => setEditMin((m) => wrapDec(m, 60))}
-                aria-label="Decrease minute"
+                aria-label={t(lang, "decreaseMinute")}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="6 9 12 15 18 9" />

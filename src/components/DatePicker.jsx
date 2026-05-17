@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { monthNames, weekdayShort } from "../i18n";
+import { monthNames, weekdayShort, t } from "../i18n";
 
 function daysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
@@ -98,7 +98,7 @@ export default function DatePicker({ value, onChange, lang }) {
         type="button"
         className="datepicker-trigger"
         onClick={() => setOpen((v) => !v)}
-        aria-label="Pick date"
+        aria-label={t(lang, "pickDate")}
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -112,7 +112,7 @@ export default function DatePicker({ value, onChange, lang }) {
         <div className="datepicker-popup">
           {/* Header */}
           <div className="datepicker-header">
-            <button type="button" className="datepicker-nav-btn" onClick={goPrev} aria-label="Previous month">
+            <button type="button" className="datepicker-nav-btn" onClick={goPrev} aria-label={t(lang, "prevMonth")}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
@@ -120,7 +120,7 @@ export default function DatePicker({ value, onChange, lang }) {
             <span className="datepicker-title">
               {mn[viewMonth]} {viewYear}
             </span>
-            <button type="button" className="datepicker-nav-btn" onClick={goNext} aria-label="Next month">
+            <button type="button" className="datepicker-nav-btn" onClick={goNext} aria-label={t(lang, "nextMonth")}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6" />
               </svg>

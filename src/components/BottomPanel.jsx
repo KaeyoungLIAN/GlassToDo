@@ -210,7 +210,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
               <div className="picker-line">
                 <DatePicker value={onceDate} onChange={(v) => { userSetOnceRef.current = true; setOnceDate(v); }} lang={lang} />
                 <span className="picker-sep">–</span>
-                <TimePicker value={onceTime} onChange={setOnceTime} />
+                <TimePicker value={onceTime} onChange={setOnceTime} lang={lang} />
               </div>
             ) : (
               <div className="picker-line">
@@ -228,7 +228,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
                     ));
                   })()}
                 </div>
-                <TimePicker value={weeklyTime} onChange={setWeeklyTime} />
+                <TimePicker value={weeklyTime} onChange={setWeeklyTime} lang={lang} />
               </div>
             )}
           </div>
@@ -243,7 +243,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>
-                Web
+                {t(lang, "webLink")}
               </button>
               <button
                 className={"seg-btn" + (linkType === "meeting" ? " active" : "")}
@@ -253,7 +253,7 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
                   <polygon points="23 7 16 12 23 17 23 7" />
                   <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
                 </svg>
-                腾讯会议
+                {t(lang, "meetingLink")}
               </button>
             </div>
             {linkType === "url" ? (

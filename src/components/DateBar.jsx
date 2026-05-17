@@ -64,7 +64,7 @@ export default function DateBar({ dateStr, weekday, onPrev, onNext, onToday, onR
   return (
     <div id="datebar">
       <div id="date-nav">
-        <button className="nav-btn" onClick={onPrev} aria-label="Previous day">
+        <button className="nav-btn" onClick={onPrev} aria-label={t(lang, "prevDay")}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
@@ -74,13 +74,13 @@ export default function DateBar({ dateStr, weekday, onPrev, onNext, onToday, onR
           {open && (
             <div className="datebar-popup">
               <div className="datebar-popup-header">
-                <button type="button" className="datebar-nav-btn" onClick={goPrevMonth} aria-label="Previous month">
+                <button type="button" className="datebar-nav-btn" onClick={goPrevMonth} aria-label={t(lang, "prevMonth")}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="15 18 9 12 15 6" />
                   </svg>
                 </button>
                 <span className="datebar-popup-title">{mn[viewMonth]} {viewYear}</span>
-                <button type="button" className="datebar-nav-btn" onClick={goNextMonth} aria-label="Next month">
+                <button type="button" className="datebar-nav-btn" onClick={goNextMonth} aria-label={t(lang, "nextMonth")}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
@@ -106,7 +106,7 @@ export default function DateBar({ dateStr, weekday, onPrev, onNext, onToday, onR
             </div>
           )}
         </div>
-        <button className="nav-btn" onClick={onNext} aria-label="Next day">
+        <button className="nav-btn" onClick={onNext} aria-label={t(lang, "nextDay")}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 18 15 12 9 6" />
           </svg>

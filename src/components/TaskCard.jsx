@@ -27,7 +27,7 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
           className={"reorder-btn up" + (isFirst ? " disabled" : "")}
           onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
           disabled={isFirst}
-          title="Move up"
+          title={t(lang, "moveUp")}
           tabIndex={-1}
         >
           <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
@@ -38,7 +38,7 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
           className={"reorder-btn down" + (isLast ? " disabled" : "")}
           onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
           disabled={isLast}
-          title="Move down"
+          title={t(lang, "moveDown")}
           tabIndex={-1}
         >
           <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
@@ -73,7 +73,7 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
           ) : null}
         </div>
       </div>
-      <button className={"action-btn pin-btn" + (task.pinned ? " active" : "")} onClick={() => onPin(task.id)} title={task.pinned ? "Unpin" : "Pin to top"}>
+      <button className={"action-btn pin-btn" + (task.pinned ? " active" : "")} onClick={() => onPin(task.id)} title={task.pinned ? t(lang, "unpin") : t(lang, "pinToTop")}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="4" y1="20" x2="20" y2="20" />
           <line x1="12" y1="3" x2="12" y2="16" />
@@ -95,7 +95,7 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
             // URL is already the final form: wemeet:// for meetings, raw URL otherwise
             invoke("open_url", { url: task.link_url });
           }}
-          title={task.link_url}
+          title={t(lang, "openLink")}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -103,13 +103,13 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
           </svg>
         </button>
       )}
-      <button className="action-btn edit-btn" onClick={() => onEdit(task)} title="Edit">
+      <button className="action-btn edit-btn" onClick={() => onEdit(task)} title={t(lang, "edit")}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
         </svg>
       </button>
-      <button className="action-btn delete-btn" onClick={() => onDelete(task.id, task.content, task)} title="Delete">
+      <button className="action-btn delete-btn" onClick={() => onDelete(task.id, task.content, task)} title={t(lang, "delete")}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="3 6 5 6 21 6" />
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
