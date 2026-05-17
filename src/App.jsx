@@ -133,12 +133,14 @@ export default function App() {
   );
 
   const handleToggleCollapse = useCallback(async () => {
-    const win = getCurrentWindow();
-    const size = await win.outerSize();
-    originalSizeRef.current = { width: size.width, height: size.height };
-    await win.setMinSize(new LogicalSize(400, COLLAPSED_HEIGHT));
-    await win.setResizable(false);
-    await win.setSize(new LogicalSize(size.width, COLLAPSED_HEIGHT));
+    try {
+      const win = getCurrentWindow();
+      const size = await win.outerSize();
+      originalSizeRef.current = { width: size.width, height: size.height };
+      await win.setMinSize(new LogicalSize(400, COLLAPSED_HEIGHT));
+      await win.setResizable(false);
+      await win.setSize(new LogicalSize(size.width, COLLAPSED_HEIGHT));
+    } catch (e) { console.error("collapse:", e); }
     setCollapsed(true);
   }, []);
 
@@ -152,12 +154,14 @@ export default function App() {
   }, [alwaysOnTop]);
 
   const handleExpand = useCallback(async () => {
-    const win = getCurrentWindow();
-    if (originalSizeRef.current) {
-      await win.setSize(new LogicalSize(originalSizeRef.current.width, originalSizeRef.current.height));
-      await win.setMinSize(new LogicalSize(400, 400));
-      await win.setResizable(true);
-    }
+    try {
+      const win = getCurrentWindow();
+      if (originalSizeRef.current) {
+        await win.setSize(new LogicalSize(originalSizeRef.current.width, originalSizeRef.current.height));
+        await win.setMinSize(new LogicalSize(400, 400));
+        await win.setResizable(true);
+      }
+    } catch (e) { console.error("expand:", e); }
     setCollapsed(false);
   }, []);
 
