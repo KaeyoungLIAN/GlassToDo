@@ -26,6 +26,7 @@ export default function CollapsedBar({ lang, alwaysOnTop, onTogglePin, onExpand,
       const sf = await win.scaleFactor();
       winPosRef.current = { x: pos.x, y: pos.y, sf };
       readyRef.current = true;
+      barRef.current?.classList.add("dragging");
     } catch {
       capturedRef.current = false;
       if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
@@ -66,6 +67,7 @@ export default function CollapsedBar({ lang, alwaysOnTop, onTogglePin, onExpand,
     capturedRef.current = false;
     readyRef.current = false;
     draggingRef.current = false;
+    barRef.current?.classList.remove("dragging");
   }, []);
 
   return (
