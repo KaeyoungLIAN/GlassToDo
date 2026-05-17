@@ -299,7 +299,7 @@ fn toggle_complete(state: State<'_, AppState>, app: AppHandle, id: u32) -> Resul
                 if let Some(pos) = t.completed_dates.iter().position(|d| d == &today) {
                     t.completed_dates.remove(pos);
                 } else {
-                    t.completed_dates.push(today);
+                    t.completed_dates.push(today.clone());
                     t.last_reminded = Some(today);
                 }
             } else {
