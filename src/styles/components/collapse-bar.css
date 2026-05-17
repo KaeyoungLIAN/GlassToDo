@@ -11,14 +11,14 @@
 .collapse-bar-inner {
   display: flex;
   align-items: center;
-  height: 28px;
-  padding: 0 8px;
-  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  gap: 10px;
   pointer-events: none;
 }
 
 .collapse-bar-pin-btn {
-  width: 24px; height: 22px;
+  width: 24px; height: 26px;
   background: transparent; border: none;
   color: var(--text-tertiary); cursor: pointer;
   border-radius: 4px;

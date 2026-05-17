@@ -27,7 +27,8 @@ export default function App() {
   const [collapsed, setCollapsed] = useState(false);
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
 
-  const COLLAPSED_HEIGHT = 32;
+  const COLLAPSED_HEIGHT = 40;
+  const COLLAPSED_WIDTH = 240;
   const originalSizeRef = useRef(null);
   const taskApi = useTasks(lang);
   const {
@@ -138,9 +139,9 @@ export default function App() {
       const size = await win.outerSize();
       const sf = await win.scaleFactor();
       originalSizeRef.current = { size, sf };
-      await win.setMinSize(new LogicalSize(400, COLLAPSED_HEIGHT));
+      await win.setMinSize(new LogicalSize(COLLAPSED_WIDTH, COLLAPSED_HEIGHT));
       await win.setResizable(false);
-      await win.setSize(new PhysicalSize(size.width, Math.round(COLLAPSED_HEIGHT * sf)));
+      await win.setSize(new PhysicalSize(Math.round(COLLAPSED_WIDTH * sf), Math.round(COLLAPSED_HEIGHT * sf)));
     } catch (e) { console.error("collapse:", e); }
     setCollapsed(true);
   }, []);
