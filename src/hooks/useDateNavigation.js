@@ -23,7 +23,7 @@ export default function useDateNavigation(tasks) {
   weekStart.setDate(weekStart.getDate() - (day === 0 ? 6 : day - 1));
   const weekStartStr = fmt(weekStart);
 
-  const isTaskCompletedOn = (t, d) => t.completed || t.completed_dates?.includes(d);
+  const isTaskCompletedOn = (t, d) => t.completed_dates?.includes(d);
 
   const yesterdayCompleted = useMemo(
     () => tasks.filter((t) => isTaskCompletedOn(t, yesterdayStr)).length,

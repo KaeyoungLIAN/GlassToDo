@@ -26,6 +26,7 @@ export default function App() {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
+  const [glassEffect, setGlassEffect] = useState(false);
 
   const COLLAPSED_HEIGHT = 40;
   const COLLAPSED_WIDTH = 240;
@@ -58,6 +59,7 @@ export default function App() {
         } else {
           setShowWelcome(false);
         }
+        if (s.glass_effect !== undefined) setGlassEffect(s.glass_effect);
       })
       .catch((e) => console.error("get_settings:", e));
   }, []);
@@ -84,6 +86,21 @@ export default function App() {
     document.documentElement.classList.toggle("theme-light", theme === "light");
   }, [theme]);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle("no-glass", !glassEffect);
+    // On Windows, toggle Tauri acrylic at runtime
+    if (window.__TAURI_INTERNALS__) {
+      import("@tauri-apps/api/window").then(({ getCurrentWindow, Effect }) => {
+        const win = getCurrentWindow();
+        if (glassEffect) {
+          win.setEffects({ effects: [Effect.Acrylic] }).catch(() => {});
+        } else {
+          win.clearEffects().catch(() => {});
+        }
+      }).catch(() => {});
+    }
+  }, [glassEffect]);
+
   // ── Filtered tasks ──
   const filtered = useMemo(() => taskApi.tasks
     .filter((t) => {
@@ -101,11 +118,12 @@ export default function App() {
     }), [taskApi.tasks, showCompleted, dateStr, currentDate, completingId, searchQuery]);
 
   // ── Handlers ──
-  const handleSettingsChange = useCallback((newLang, _dataDir, showComp, newTheme, showWelcomeVal) => {
+  const handleSettingsChange = useCallback((newLang, _dataDir, showComp, newTheme, showWelcomeVal, newGlass) => {
     if (newLang) setLang(newLang);
     if (showComp !== undefined) setShowCompleted(showComp);
     if (newTheme) setTheme(newTheme);
     if (showWelcomeVal !== undefined) setShowWelcome(showWelcomeVal);
+    if (newGlass !== undefined) setGlassEffect(newGlass);
   }, []);
 
   const handleEmptySubmit = useCallback(() => {

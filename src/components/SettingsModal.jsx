@@ -18,7 +18,7 @@ export default function SettingsModal({ lang, theme, showCompleted, showWelcome,
   const update = async (updated) => {
     setSettings(updated);
     await invoke("update_settings", { settings: updated }).catch(console.error);
-    onSettingsChange(updated.language, updated.data_dir, updated.show_completed, updated.theme, updated.show_welcome);
+    onSettingsChange(updated.language, updated.data_dir, updated.show_completed, updated.theme, updated.show_welcome, updated.glass_effect);
   };
 
   const handleLangChange = (code) => {
@@ -103,6 +103,17 @@ export default function SettingsModal({ lang, theme, showCompleted, showWelcome,
                 <div className="toggle-thumb" />
               </div>
               <span className="toggle-label">{settings.show_welcome ? t(settings.language, "yes") : t(settings.language, "no")}</span>
+            </label>
+          </div>
+
+          {/* Glass effect */}
+          <div className="settings-field">
+            <label className="settings-label">{t(settings.language, "glassEffect")}</label>
+            <label className="toggle-row" onClick={() => update({ ...settings, glass_effect: !settings.glass_effect })}>
+              <div className={`toggle-track${settings.glass_effect ? " on" : ""}`}>
+                <div className="toggle-thumb" />
+              </div>
+              <span className="toggle-label">{settings.glass_effect ? t(settings.language, "yes") : t(settings.language, "no")}</span>
             </label>
           </div>
 

@@ -45,6 +45,8 @@ pub struct Settings {
     pub theme: String,
     #[serde(default = "default_true")]
     pub show_welcome: bool,
+    #[serde(default)]
+    pub glass_effect: bool,
 }
 
 fn default_true() -> bool { true }
@@ -356,10 +358,12 @@ pub fn run() {
 
             if let Some(w) = app.get_webview_window("main") {
 
-                #[cfg(target_os = "windows")]
-                w.set_effects(EffectsBuilder::new()
-                    .effect(Effect::Acrylic)
-                    .build())?;
+                if settings.glass_effect {
+                    #[cfg(target_os = "windows")]
+                    w.set_effects(EffectsBuilder::new()
+                        .effect(Effect::Acrylic)
+                        .build())?;
+                }
 
                 // Close → hide (minimize to taskbar) on Windows
                 let handle = app.handle().clone();

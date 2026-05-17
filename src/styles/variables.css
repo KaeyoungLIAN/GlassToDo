@@ -34,7 +34,39 @@
   --body-bg: rgba(12, 12, 16, 0.40);
 }
 
-/* ── Light theme ── */
+/* ── No-glass mode (solid backgrounds, no backdrop-filter) ── */
+html.no-glass {
+  --body-bg: rgb(14, 14, 18);
+  --bg-glass: rgba(24, 24, 30, 0.88);
+  --bg-glass-hover: rgba(34, 34, 42, 0.94);
+  --bg-surface: rgba(18, 18, 24, 0.60);
+  --bg-modal: rgb(14, 14, 18);
+  --bg-input: rgba(40, 40, 48, 0.55);
+}
+html.no-glass.theme-light {
+  --body-bg: rgb(226, 226, 232);
+  --bg-glass: rgba(225, 225, 235, 0.88);
+  --bg-glass-hover: rgba(209, 209, 219, 0.92);
+  --bg-surface: rgba(210, 210, 220, 0.65);
+  --bg-modal: rgb(226, 226, 232);
+  --bg-input: rgba(190, 190, 202, 0.50);
+}
+html.no-glass #titlebar,
+html.no-glass #collapse-bar,
+html.no-glass .task-card,
+html.no-glass .bottom-panel,
+html.no-glass .settings-modal,
+html.no-glass .search-overlay,
+html.no-glass .undo-bar,
+html.no-glass .date-bar,
+html.no-glass .toast,
+html.no-glass .help-popover,
+html.no-glass .datepicker-popup,
+html.no-glass .timepicker-popup,
+html.no-glass .welcome-modal {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
 html.theme-light {
   --body-bg: rgba(240, 240, 245, 0.45);
   --bg-base: #ecedf0;

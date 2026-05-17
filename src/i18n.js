@@ -67,6 +67,7 @@ const i18n = {
     decreaseMinute: "Decrease minute",
     webLink: "Web link",
     meetingLink: "Tencent Meeting",
+    glassEffect: "Glass effect",
   },
   zh: {
     appName: "玻璃待办",
@@ -136,6 +137,7 @@ const i18n = {
     decreaseMinute: "减少分钟",
     webLink: "网页链接",
     meetingLink: "腾讯会议",
+    glassEffect: "毛玻璃效果",
   },
 };
 
