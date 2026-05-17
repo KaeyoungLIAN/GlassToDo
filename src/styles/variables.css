@@ -1,5 +1,5 @@
 :root {
-  --bg-base: #0c0c10;
+  --bg-base: #101014;
   --bg-surface: rgba(18, 18, 24, 0.40);
   --bg-glass: rgba(24, 24, 30, 0.42);
   --bg-glass-no-blur: rgba(24, 24, 30, 0.92);
@@ -31,12 +31,12 @@
   --transition-fast: 150ms var(--ease-out);
   --transition-normal: 250ms var(--ease-spring);
   --transition-slow: 400ms var(--ease-spring);
-  --body-bg: rgba(12, 12, 16, 0.40);
+  --body-bg: rgba(14, 14, 18, 0.45);
 }
 
 /* ── No-glass mode (solid backgrounds, no backdrop-filter) ── */
 html.no-glass {
-  --body-bg: rgb(14, 14, 18);
+  --body-bg: rgb(16, 16, 20);
   --bg-glass: rgba(24, 24, 30, 0.88);
   --bg-glass-hover: rgba(34, 34, 42, 0.94);
   --bg-surface: rgba(18, 18, 24, 0.60);

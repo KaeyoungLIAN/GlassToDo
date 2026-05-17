@@ -345,15 +345,21 @@ fn open_url(url: String) -> Result<(), String> {
     open::that(&url).map_err(|e| format!("Failed to open URL: {}", e))
 }
 
-/// Apply the Windows acrylic effect at runtime.
-/// More reliable than calling setEffects from JS.
+/// Apply or clear the Windows acrylic effect at runtime.
+/// More reliable than calling setEffects/clearEffects from JS.
 #[tauri::command]
-fn set_glass_effect(app: AppHandle) -> Result<(), String> {
+fn set_glass_effect(app: AppHandle, enabled: bool) -> Result<(), String> {
     if let Some(w) = app.get_webview_window("main") {
         #[cfg(target_os = "windows")]
-        w.set_effects(EffectsBuilder::new()
-            .effect(Effect::Acrylic)
-            .build()).map_err(|e| e.to_string())?;
+        if enabled {
+            w.set_effects(EffectsBuilder::new()
+                .effect(Effect::Acrylic)
+                .build()).map_err(|e| e.to_string())?;
+        } else {
+            // Empty Effects clears any existing window effect
+            w.set_effects(EffectsBuilder::new()
+                .build()).map_err(|e| e.to_string())?;
+        }
     }
     Ok(())
 }

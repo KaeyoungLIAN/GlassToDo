@@ -88,15 +88,8 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.classList.toggle("no-glass", !glassEffect);
-    if (glassEffect) {
-      // Apply DWM acrylic via Rust command (more reliable than JS setEffects)
-      invoke("set_glass_effect").catch(() => {});
-    } else if (window.__TAURI_INTERNALS__) {
-      // Clear effects via JS API (sends value: null to plugin — correct for clearing)
-      import("@tauri-apps/api/window").then(({ getCurrentWindow }) => {
-        getCurrentWindow().clearEffects().catch(() => {});
-      }).catch(() => {});
-    }
+    // Apply or clear DWM acrylic via Rust command (reliable, no JS import issues)
+    invoke("set_glass_effect", { enabled: glassEffect }).catch(() => {});
   }, [glassEffect]);
 
   // ── Filtered tasks ──
