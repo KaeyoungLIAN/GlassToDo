@@ -38,13 +38,9 @@ export default function CollapsedBar({ lang, alwaysOnTop, onTogglePin, onExpand,
     }
   }, []);
 
-  const handlePointerUp = useCallback((e) => {
-    if (!draggingRef.current) {
-      // Was a click, not a drag — expand
-      onExpand();
-    }
+  const handlePointerUp = useCallback(() => {
     draggingRef.current = false;
-  }, [onExpand]);
+  }, []);
 
   return (
     <div

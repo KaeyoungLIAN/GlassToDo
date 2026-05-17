@@ -27,7 +27,7 @@ export default function App() {
   const [collapsed, setCollapsed] = useState(false);
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
 
-  const COLLAPSED_HEIGHT = 40;
+  const COLLAPSED_HEIGHT = 32;
   const originalSizeRef = useRef(null);
   const taskApi = useTasks(lang);
   const {
