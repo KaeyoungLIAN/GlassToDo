@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
+import { getCurrentWindow, LogicalSize, PhysicalSize } from "@tauri-apps/api/window";
 import TitleBar from "./components/TitleBar";
 import CollapsedBar from "./components/CollapsedBar";
 import DateBar from "./components/DateBar";
@@ -136,10 +136,11 @@ export default function App() {
     try {
       const win = getCurrentWindow();
       const size = await win.outerSize();
-      originalSizeRef.current = { width: size.width, height: size.height };
+      const sf = await win.scaleFactor();
+      originalSizeRef.current = { size, sf };
       await win.setMinSize(new LogicalSize(400, COLLAPSED_HEIGHT));
       await win.setResizable(false);
-      await win.setSize(new LogicalSize(size.width, COLLAPSED_HEIGHT));
+      await win.setSize(new PhysicalSize(size.width, Math.round(COLLAPSED_HEIGHT * sf)));
     } catch (e) { console.error("collapse:", e); }
     setCollapsed(true);
   }, []);
@@ -157,7 +158,7 @@ export default function App() {
     try {
       const win = getCurrentWindow();
       if (originalSizeRef.current) {
-        await win.setSize(new LogicalSize(originalSizeRef.current.width, originalSizeRef.current.height));
+        await win.setSize(originalSizeRef.current.size);
         await win.setMinSize(new LogicalSize(400, 400));
         await win.setResizable(true);
       }
