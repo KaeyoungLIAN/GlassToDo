@@ -60,6 +60,7 @@ impl Default for Settings {
             show_completed: true,
             theme: "dark".to_string(),
             show_welcome: true,
+            glass_effect: true,
         }
     }
 }
@@ -269,7 +270,7 @@ fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
         link_url,
     };
     data.next_id += 1;
-    let task_id = task.id;
+    let _task_id = task.id;
     data.tasks.push(task.clone());
     save_tasks(&path, &data)?;
     *state.data.lock().map_err(|e| e.to_string())? = data.tasks;
