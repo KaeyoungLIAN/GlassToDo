@@ -12,7 +12,7 @@ function formatDateToDo(dateStr, lang) {
   return `${MONTH_NAMES[parseInt(m,10)-1]} ${parseInt(d,10)} To Do`;
 }
 
-export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPin, lang, deletingId, completingId, isFirst, isLast, onMoveUp, onMoveDown, onTogglePersist, dateStr }) {
+export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPin, lang, deletingId, completingId, reorder, onTogglePersist, dateStr }) {
   const isDeleting = task.id === deletingId;
   const isCompleting = task.id === completingId;
   const completed = task.completed || (task.completed_dates?.includes(dateStr));
@@ -24,9 +24,9 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
     >
       <div className="reorder-btns">
         <button
-          className={"reorder-btn up" + (isFirst ? " disabled" : "")}
-          onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
-          disabled={isFirst}
+          className={"reorder-btn up" + (reorder?.isFirst ? " disabled" : "")}
+          onClick={(e) => { e.stopPropagation(); reorder?.onMoveUp(); }}
+          disabled={reorder?.isFirst}
           title={t(lang, "moveUp")}
           tabIndex={-1}
         >
@@ -35,9 +35,9 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
           </svg>
         </button>
         <button
-          className={"reorder-btn down" + (isLast ? " disabled" : "")}
-          onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
-          disabled={isLast}
+          className={"reorder-btn down" + (reorder?.isLast ? " disabled" : "")}
+          onClick={(e) => { e.stopPropagation(); reorder?.onMoveDown(); }}
+          disabled={reorder?.isLast}
           title={t(lang, "moveDown")}
           tabIndex={-1}
         >

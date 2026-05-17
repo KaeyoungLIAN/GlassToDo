@@ -1,23 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
-import { t, dayLabels } from "../i18n";
-import DatePicker from "./DatePicker";
-import TimePicker from "./TimePicker";
+import { t } from "../i18n";
+import ScheduledOptions from "./ScheduledOptions";
 
 function fmt(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-const DAY_KEYS = [1, 2, 3, 4, 5, 6, 0];
-
 export default function BottomPanel({ editingId, editText, editRtype, editRdata, editLinkUrl, onSave, onCancelEdit, dateStr, lang, onEmptySubmit, showToast }) {
   const [content, setContent] = useState("");
-  const [taskMode, setTaskMode] = useState("normal"); // "normal" | "scheduled"
+  const [taskMode, setTaskMode] = useState("normal");
   const [rtype, setRtype] = useState("once");
   const [onceDate, setOnceDate] = useState(dateStr);
   const [onceTime, setOnceTime] = useState("14:30");
   const [activeDays, setActiveDays] = useState(new Set());
   const [weeklyTime, setWeeklyTime] = useState("09:00");
-  const [linkType, setLinkType] = useState("url"); // "url" | "meeting"
+  const [linkType, setLinkType] = useState("url");
   const [linkUrl, setLinkUrl] = useState("");
   const [meetingCode, setMeetingCode] = useState("");
   const [expanded, setExpanded] = useState(false);
@@ -30,7 +27,6 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       setContent(editText);
       setTaskMode("scheduled");
       setRtype(editRtype);
-      // Detect wemeet:// meeting code from saved link_url
       const wxMatch = (editLinkUrl || "").match(/wemeet:\/\/page\/inmeeting\?meeting_code=([a-zA-Z0-9]+)/);
       if (wxMatch) {
         setLinkType("meeting");
@@ -80,25 +76,21 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       return;
     }
 
-    // Validate link URL
     const rawUrl = linkType === "meeting" && meetingCode.trim()
       ? `wemeet://page/inmeeting?meeting_code=${meetingCode.trim()}`
       : linkType === "meeting" ? ""
       : linkUrl;
     if (rawUrl && !isValidUrl(rawUrl)) {
-      setToast(t(lang, "invalidLink"));
-      setTimeout(() => setToast(null), 2500);
+      showToast(t(lang, "invalidLink"));
       return;
     }
 
-    // Build final link_url: meeting code → wemeet://, else raw URL
     const finalLinkUrl = linkType === "meeting" && meetingCode.trim()
       ? `wemeet://page/inmeeting?meeting_code=${meetingCode.trim()}`
       : linkType === "meeting" ? ""
       : linkUrl;
 
     if (editingId === null && taskMode === "normal") {
-      // Normal task: no reminder, due today
       const rd = { datetime: `${dateStr}T23:59:00`, days: [], time: "09:00" };
       onSave(text, "once", rd);
       setContent("");
@@ -108,7 +100,6 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       return;
     }
 
-    // Scheduled task (once or weekly — weekly uses completed_dates for per-day tracking)
     const rd =
       rtype === "once"
         ? { datetime: `${onceDate || dateStr}T${onceTime}:00`, days: [], time: "09:00" }
@@ -131,15 +122,10 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
 
   const handleKey = (e) => { if (e.key === "Enter") handleSubmit(); };
 
-  // Switch mode
   const switchMode = (mode) => {
     setTaskMode(mode);
-    if (mode === "scheduled" && !expanded) {
-      setExpanded(true);
-    }
-    if (mode === "normal") {
-      setExpanded(false);
-    }
+    if (mode === "scheduled" && !expanded) setExpanded(true);
+    if (mode === "normal") setExpanded(false);
     inputRef.current?.focus();
   };
 
@@ -188,95 +174,27 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
         </button>
       </div>
 
-      {/* Scheduled options — segmented control + inline pickers */}
+      {/* Scheduled options — collapsible */}
       <div id="reminder-collapse" className={taskMode === "scheduled" ? "open" : ""}>
-        <div id="reminder-inner">
-          <div id="scheduled-row">
-            <div className="segmented">
-              <button
-                className={"seg-btn" + (rtype === "once" ? " active" : "")}
-                onClick={() => setRtype("once")}
-              >
-                {t(lang, "oneTime")}
-              </button>
-              <button
-                className={"seg-btn" + (rtype === "weekly" ? " active" : "")}
-                onClick={() => setRtype("weekly")}
-              >
-                {t(lang, "weekly")}
-              </button>
-            </div>
-            {rtype === "once" ? (
-              <div className="picker-line">
-                <DatePicker value={onceDate} onChange={(v) => { userSetOnceRef.current = true; setOnceDate(v); }} lang={lang} />
-                <span className="picker-sep">–</span>
-                <TimePicker value={onceTime} onChange={setOnceTime} lang={lang} />
-              </div>
-            ) : (
-              <div className="picker-line">
-                <div id="day-picker">
-                  {(() => {
-                    const labels = dayLabels(lang);
-                    return DAY_KEYS.map((key, i) => (
-                      <button
-                        key={key}
-                        className={"day-btn" + (activeDays.has(key) ? " active" : "")}
-                        onClick={() => toggleDay(key)}
-                      >
-                        {labels[i]}
-                      </button>
-                    ));
-                  })()}
-                </div>
-                <TimePicker value={weeklyTime} onChange={setWeeklyTime} lang={lang} />
-              </div>
-            )}
-          </div>
-          {/* Link type segmented + inline input (same pattern as date-time pickers) */}
-          <div className="picker-line" style={{ marginTop: 8 }}>
-            <div className="segmented">
-              <button
-                className={"seg-btn" + (linkType === "url" ? " active" : "")}
-                onClick={() => setLinkType("url")}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-                {t(lang, "webLink")}
-              </button>
-              <button
-                className={"seg-btn" + (linkType === "meeting" ? " active" : "")}
-                onClick={() => setLinkType("meeting")}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="23 7 16 12 23 17 23 7" />
-                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                </svg>
-                {t(lang, "meetingLink")}
-              </button>
-            </div>
-            {linkType === "url" ? (
-              <input
-                type="url"
-                className="link-url-input"
-                placeholder={t(lang, "linkPlaceholder")}
-                value={linkUrl}
-                onChange={(e) => setLinkUrl(e.target.value)}
-                autoComplete="off"
-              />
-            ) : (
-              <input
-                type="text"
-                className="link-url-input"
-                placeholder={t(lang, "meetingCode")}
-                value={meetingCode}
-                onChange={(e) => setMeetingCode(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ""))}
-                autoComplete="off"
-              />
-            )}
-          </div>
-        </div>
+        <ScheduledOptions
+          lang={lang}
+          rtype={rtype}
+          onRtypeChange={setRtype}
+          onceDate={onceDate}
+          onOnceDateChange={(v) => { userSetOnceRef.current = true; setOnceDate(v); }}
+          onceTime={onceTime}
+          onOnceTimeChange={setOnceTime}
+          activeDays={activeDays}
+          onToggleDay={toggleDay}
+          weeklyTime={weeklyTime}
+          onWeeklyTimeChange={setWeeklyTime}
+          linkType={linkType}
+          onLinkTypeChange={setLinkType}
+          linkUrl={linkUrl}
+          onLinkUrlChange={setLinkUrl}
+          meetingCode={meetingCode}
+          onMeetingCodeChange={setMeetingCode}
+        />
       </div>
     </div>
   );

@@ -52,10 +52,7 @@ export default function TaskList({ tasks, onToggle, onDelete, onEdit, onPin, onR
               lang={lang}
               deletingId={deletingId}
               completingId={completingId}
-              isFirst={i === 0}
-              isLast={i === tasks.length - 1}
-              onMoveUp={() => moveTask(i, -1)}
-              onMoveDown={() => moveTask(i, 1)}
+              reorder={{ isFirst: i === 0, isLast: i === tasks.length - 1, onMoveUp: () => moveTask(i, -1), onMoveDown: () => moveTask(i, 1) }}
               onTogglePersist={() => onTogglePersist(t.id)}
             />
           </div>

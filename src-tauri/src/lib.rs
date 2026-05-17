@@ -1,4 +1,4 @@
-use chrono::{Datelike, Local};
+use chrono::{Datelike, Local, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
@@ -62,6 +62,8 @@ impl Default for Settings {
     }
 }
 
+// ── Persistence module ──
+
 fn settings_path(app: &AppHandle) -> PathBuf {
     let dir = app.path().app_data_dir().expect("app data dir");
     fs::create_dir_all(&dir).ok();
@@ -114,8 +116,6 @@ fn save_tasks(path: &PathBuf, data: &TodoData) -> Result<(), String> {
     Ok(())
 }
 
-/// Load tasks + settings path in one call (DRY helper for commands that
-/// read/modify task data).
 fn load_tasks_with_settings(app: &AppHandle) -> (PathBuf, TodoData) {
     let sp = settings_path(app);
     let settings = load_settings(&sp);
@@ -124,31 +124,89 @@ fn load_tasks_with_settings(app: &AppHandle) -> (PathBuf, TodoData) {
     (path, data)
 }
 
+/// Load, modify, save, and sync state in one call.
+/// Reduces the load→modify→save→sync pattern from 4 lines to 1.
+fn modify_tasks<F>(state: &State<AppState>, app: &AppHandle, f: F) -> Result<(), String>
+where F: FnOnce(&mut Vec<TaskItem>)
+{
+    let (path, mut data) = load_tasks_with_settings(app);
+    f(&mut data.tasks);
+    save_tasks(&path, &data)?;
+    *state.data.lock().map_err(|e| e.to_string())? = data.tasks;
+    Ok(())
+}
+
+// ── Reminder helpers ──
+
+/// Check whether a task's reminder is due at the given time.
+/// Pure function — no side effects, no I/O.
+fn is_reminder_due(task: &TaskItem, now: NaiveDateTime) -> bool {
+    if task.completed { return false; }
+    match task.reminder_type.as_str() {
+        "once" => {
+            let dt = match task.reminder_data.datetime.as_ref() {
+                Some(d) => d,
+                None => return false,
+            };
+            let parsed = match NaiveDateTime::parse_from_str(dt, "%Y-%m-%dT%H:%M:%S") {
+                Ok(p) => p,
+                Err(_) => return false,
+            };
+            parsed <= now
+        }
+        "weekly" => {
+            let wd = now.weekday().num_days_from_sunday() as u8;
+            if !task.reminder_data.days.contains(&wd) { return false; }
+            let rt = match NaiveTime::parse_from_str(&task.reminder_data.time, "%H:%M") {
+                Ok(t) => t,
+                Err(_) => return false,
+            };
+            now.date().and_time(rt) <= now
+        }
+        _ => false,
+    }
+}
+
+/// Update last_reminded for tasks whose reminder has passed.
 fn update_last_reminded(tasks: &mut [TaskItem]) {
-    let now = Local::now();
-    let today = now.format("%Y-%m-%d").to_string();
-    let now_ts = now.format("%Y-%m-%d %H:%M:%S").to_string();
+    let now = Local::now().naive_local();
     for t in tasks.iter_mut() {
         if t.completed { continue; }
-        if t.reminder_type == "once" {
-            if let Some(ref dt) = t.reminder_data.datetime.clone() {
-                if let Ok(dt) = chrono::NaiveDateTime::parse_from_str(&dt, "%Y-%m-%dT%H:%M:%S") {
-                    if dt <= now.naive_local() && t.last_reminded.is_none() {
-                        t.last_reminded = Some(now_ts.clone());
-                    }
+        match t.reminder_type.as_str() {
+            "once" => {
+                if is_reminder_due(t, now) && t.last_reminded.is_none() {
+                    t.last_reminded = Some(Local::now().format("%Y-%m-%d %H:%M:%S").to_string());
                 }
             }
-        } else if t.reminder_type == "weekly" {
-            let wd = now.weekday().num_days_from_sunday() as u8;
-            if t.reminder_data.days.contains(&wd) {
-                if let Ok(rt) = chrono::NaiveTime::parse_from_str(&t.reminder_data.time, "%H:%M") {
-                    if now.date_naive().and_time(rt) <= now.naive_local() && t.last_reminded.as_deref() != Some(&today) {
-                        t.last_reminded = Some(today.clone());
-                    }
+            "weekly" => {
+                let today = Local::now().format("%Y-%m-%d").to_string();
+                if is_reminder_due(t, now) && t.last_reminded.as_deref() != Some(&today) {
+                    t.last_reminded = Some(today);
                 }
             }
+            _ => {}
         }
     }
+}
+
+/// Fire notifications for tasks whose reminders are newly due.
+fn notify_due_tasks(app: &AppHandle, tasks: &[TaskItem]) -> Vec<String> {
+    let now = Local::now().naive_local();
+    let mut alerts = vec![];
+    use tauri_plugin_notification::NotificationExt;
+    for t in tasks {
+        if !is_reminder_due(t, now) { continue; }
+        let already_notified = match t.reminder_type.as_str() {
+            "once" => t.last_reminded.is_some(),
+            "weekly" => t.last_reminded.as_deref() == Some(&Local::now().format("%Y-%m-%d").to_string()),
+            _ => true,
+        };
+        if already_notified { continue; }
+        alerts.push(t.content.clone());
+        let body = if t.reminder_type == "weekly" { "Weekly reminder" } else { "Single reminder" };
+        app.notification().builder().title(&t.content).body(body).show().ok();
+    }
+    alerts
 }
 
 // ── Settings commands ──
@@ -160,14 +218,11 @@ fn get_settings(app: AppHandle) -> Result<Settings, String> {
 }
 
 #[tauri::command]
-fn update_settings(app: AppHandle, settings: Settings) -> Result<(), String> {
+fn update_settings(app: AppHandle, state: State<'_, AppState>, settings: Settings) -> Result<(), String> {
     let path = settings_path(&app);
     save_settings(&path, &settings)?;
-
-    let state: State<'_, AppState> = app.state();
-    let (new_path, data) = load_tasks_with_settings(&app);
-    *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
-
+    // Re-load tasks from potentially new data directory
+    modify_tasks(&state, &app, |_| {})?;
     Ok(())
 }
 
@@ -211,78 +266,53 @@ fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
         completed_dates: Vec::new(),
         link_url,
     };
-    data.next_id += 1; data.tasks.push(task.clone());
+    data.next_id += 1;
+    let task_id = task.id;
+    data.tasks.push(task.clone());
     save_tasks(&path, &data)?;
-    *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
+    *state.data.lock().map_err(|e| e.to_string())? = data.tasks;
     Ok(task)
 }
 
 #[tauri::command]
 fn update_task(state: State<'_, AppState>, app: AppHandle, task: TaskItem) -> Result<(), String> {
-    let (path, mut data) = load_tasks_with_settings(&app);
-    if let Some(t) = data.tasks.iter_mut().find(|t| t.id == task.id) { *t = task; }
-    save_tasks(&path, &data)?;
-    *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
-    Ok(())
+    modify_tasks(&state, &app, |tasks| {
+        if let Some(t) = tasks.iter_mut().find(|t| t.id == task.id) {
+            *t = task;
+        }
+    })
 }
 
 #[tauri::command]
 fn delete_task(state: State<'_, AppState>, app: AppHandle, id: u32) -> Result<(), String> {
-    let (path, mut data) = load_tasks_with_settings(&app);
-    data.tasks.retain(|t| t.id != id);
-    save_tasks(&path, &data)?;
-    *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
-    Ok(())
+    modify_tasks(&state, &app, |tasks| {
+        tasks.retain(|t| t.id != id);
+    })
 }
 
 #[tauri::command]
 fn toggle_complete(state: State<'_, AppState>, app: AppHandle, id: u32) -> Result<(), String> {
-    let (path, mut data) = load_tasks_with_settings(&app);
-    if let Some(t) = data.tasks.iter_mut().find(|t| t.id == id) {
-        if t.reminder_type == "weekly" {
-            let today = Local::now().format("%Y-%m-%d").to_string();
-            if let Some(pos) = t.completed_dates.iter().position(|d| d == &today) {
-                t.completed_dates.remove(pos);
+    modify_tasks(&state, &app, |tasks| {
+        if let Some(t) = tasks.iter_mut().find(|t| t.id == id) {
+            if t.reminder_type == "weekly" {
+                let today = Local::now().format("%Y-%m-%d").to_string();
+                if let Some(pos) = t.completed_dates.iter().position(|d| d == &today) {
+                    t.completed_dates.remove(pos);
+                } else {
+                    t.completed_dates.push(today);
+                    t.last_reminded = Some(today);
+                }
             } else {
-                t.completed_dates.push(today.clone());
-                t.last_reminded = Some(today);
+                t.completed = !t.completed;
             }
-        } else {
-            t.completed = !t.completed;
         }
-    }
-    save_tasks(&path, &data)?;
-    *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
-    Ok(())
+    })
 }
 
 #[tauri::command]
 fn check_and_notify(state: State<'_, AppState>, app: AppHandle) -> Result<Vec<String>, String> {
     let (path, mut data) = load_tasks_with_settings(&app);
-    let now = Local::now(); let mut alerts = vec![];
-    let today_wd = now.weekday().num_days_from_sunday() as u8;
-    use tauri_plugin_notification::NotificationExt;
-    for t in &data.tasks {
-        if t.completed { continue; }
-        if t.reminder_type == "once" {
-            if let Some(ref dt) = t.reminder_data.datetime {
-                if let Ok(dt) = chrono::NaiveDateTime::parse_from_str(dt, "%Y-%m-%dT%H:%M:%S") {
-                    if dt <= now.naive_local() && t.last_reminded.is_none() {
-                        alerts.push(t.content.clone());
-                        app.notification().builder().title(&t.content).body("Single reminder").show().ok();
-                    }
-                }
-            }
-        } else if t.reminder_type == "weekly" && t.reminder_data.days.contains(&today_wd) {
-            if let Ok(rt) = chrono::NaiveTime::parse_from_str(&t.reminder_data.time, "%H:%M") {
-                if now.date_naive().and_time(rt) <= now.naive_local()
-                    && t.last_reminded.as_deref() != Some(&now.format("%Y-%m-%d").to_string()) {
-                    alerts.push(t.content.clone());
-                    app.notification().builder().title(&t.content).body("Weekly reminder").show().ok();
-                }
-            }
-        }
-    }
+    let alerts = notify_due_tasks(&app, &data.tasks);
     update_last_reminded(&mut data.tasks);
     save_tasks(&path, &data)?;
     *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
@@ -291,22 +321,18 @@ fn check_and_notify(state: State<'_, AppState>, app: AppHandle) -> Result<Vec<St
 
 #[tauri::command]
 fn reorder_tasks(state: State<'_, AppState>, app: AppHandle, ids: Vec<u32>) -> Result<(), String> {
-    let (path, mut data) = load_tasks_with_settings(&app);
-
-    for (i, id) in ids.iter().enumerate() {
-        if let Some(t) = data.tasks.iter_mut().find(|t| t.id == *id) {
-            t.position = i as u32;
+    modify_tasks(&state, &app, |tasks| {
+        for (i, id) in ids.iter().enumerate() {
+            if let Some(t) = tasks.iter_mut().find(|t| t.id == *id) {
+                t.position = i as u32;
+            }
         }
-    }
-    save_tasks(&path, &data)?;
-    *state.data.lock().map_err(|e| e.to_string())? = data.tasks.clone();
-    Ok(())
+    })
 }
 
 struct AppState { data: Mutex<Vec<TaskItem>> }
 
-/// Open a URL using the system protocol handler. Validates the scheme on the
-/// Rust side so this is safe even without Tauri's shell plugin scope.
+/// Open a URL using the system protocol handler.
 #[tauri::command]
 fn open_url(url: String) -> Result<(), String> {
     let allowed = ["https://", "http://", "mailto:", "tel:", "wemeet://"];
