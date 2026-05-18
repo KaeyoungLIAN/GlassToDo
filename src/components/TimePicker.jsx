@@ -11,6 +11,7 @@ export default function TimePicker({ value, onChange, lang }) {
   const prevOpenRef = useRef(false);
   const inputRef = useRef(null);
   const [editing, setEditing] = useState(null); // 'hour', 'minute', or null
+  const [rawText, setRawText] = useState("");   // raw input text during edit (no padding)
 
   // Parse current value
   const parts = value ? value.split(":") : [];
@@ -41,6 +42,7 @@ export default function TimePicker({ value, onChange, lang }) {
       setEditHour(initHour);
       setEditMin(initMin);
       setEditing(null);
+      setRawText("");
     }
   }, [open]);
 
@@ -84,17 +86,20 @@ export default function TimePicker({ value, onChange, lang }) {
     setOpen(false);
   };
 
+  // Input change: update both numeric state and raw display text
   const handleInputChange = (e, setter, maxVal) => {
-    const raw = e.target.value;
-    // Allow empty for clearing
-    if (raw === "") {
+    const cleaned = e.target.value.replace(/\D/g, "");
+    setRawText(cleaned);
+    if (cleaned === "") {
       setter(0);
       return;
     }
-    const num = parseInt(raw.replace(/\D/g, ""), 10);
+    const num = parseInt(cleaned, 10);
     if (isNaN(num)) return;
     if (num >= maxVal) {
-      setter(maxVal - 1);
+      const clamped = maxVal - 1;
+      setter(clamped);
+      setRawText(String(clamped));
     } else {
       setter(num);
     }
@@ -111,13 +116,14 @@ export default function TimePicker({ value, onChange, lang }) {
 
   const renderValueCell = (field, valueStr, setter, maxVal) => {
     if (editing === field) {
+      // During edit: show raw text (unpadded) so user sees exactly what they typed
       return (
         <input
           ref={inputRef}
           className="timepicker-input"
           type="text"
           inputMode="numeric"
-          value={valueStr}
+          value={rawText}
           onChange={(e) => handleInputChange(e, setter, maxVal)}
           onKeyDown={(e) => handleInputKeyDown(e, field)}
           onBlur={() => setEditing(null)}
@@ -129,7 +135,10 @@ export default function TimePicker({ value, onChange, lang }) {
     return (
       <span
         className="timepicker-value"
-        onClick={() => setEditing(field)}
+        onClick={() => {
+          setEditing(field);
+          setRawText(field === "hour" ? String(editHour) : String(editMin));
+        }}
         onWheel={handleWheel(setter, maxVal)}
       >
         {valueStr}
