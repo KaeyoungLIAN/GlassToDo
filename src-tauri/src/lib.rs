@@ -343,12 +343,12 @@ fn toggle_complete(state: State<'_, AppState>, app: AppHandle, id: u32) -> Resul
 #[tauri::command]
 fn check_and_notify(state: State<'_, AppState>, app: AppHandle) -> Result<Vec<String>, String> {
     use tauri_plugin_notification::NotificationExt;
-    match app.notification().permission().state() {
+    match app.notification().permission_state() {
         tauri_plugin_notification::PermissionState::Denied => {
             return Ok(vec![]);
         }
-        tauri_plugin_notification::PermissionState::NotDetermined => {
-            let _ = app.notification().permission().request();
+        tauri_plugin_notification::PermissionState::Prompt => {
+            let _ = app.notification().request_permission()?;
         }
         _ => {}
     }
@@ -374,7 +374,7 @@ fn reorder_tasks(state: State<'_, AppState>, app: AppHandle, ids: Vec<u32>) -> R
 // ── Trash commands ──
 
 #[tauri::command]
-fn get_trash(state: State<'_, AppState>, _app: AppHandle) -> Result<Vec<TaskItem>, String> {
+fn get_trash(_state: State<'_, AppState>, _app: AppHandle) -> Result<Vec<TaskItem>, String> {
     let (_path, data) = load_tasks_with_settings(&_app);
     Ok(data.trash)
 }
