@@ -226,8 +226,17 @@ fn notify_due_tasks(app: &AppHandle, tasks: &[TaskItem]) -> Vec<String> {
         };
         if already_notified { continue; }
         alerts.push(t.content.clone());
-        let body = if t.reminder_type == "weekly" { "Weekly reminder" } else { "Single reminder" };
-        app.notification().builder().title(&t.content).body(body).show().ok();
+        // Best-effort system notification — never block reminder processing
+        match app.notification().permission_state() {
+            Ok(tauri_plugin_notification::PermissionState::Granted) => {
+                let body = if t.reminder_type == "weekly" { "Weekly reminder" } else { "Single reminder" };
+                app.notification().builder().title(&t.content).body(body).show().ok();
+            }
+            Ok(tauri_plugin_notification::PermissionState::Prompt) => {
+                let _ = app.notification().request_permission();
+            }
+            _ => {} // Denied or error — skip system notification, alerts still returned
+        }
     }
     alerts
 }
@@ -342,16 +351,6 @@ fn toggle_complete(state: State<'_, AppState>, app: AppHandle, id: u32) -> Resul
 
 #[tauri::command]
 fn check_and_notify(state: State<'_, AppState>, app: AppHandle) -> Result<Vec<String>, String> {
-    use tauri_plugin_notification::NotificationExt;
-    match app.notification().permission_state() {
-        Ok(tauri_plugin_notification::PermissionState::Denied) => {
-            return Ok(vec![]);
-        }
-        Ok(tauri_plugin_notification::PermissionState::Prompt) => {
-            let _ = app.notification().request_permission();
-        }
-        _ => {}
-    }
     let (path, mut data) = load_tasks_with_settings(&app);
     let alerts = notify_due_tasks(&app, &data.tasks);
     update_last_reminded(&mut data.tasks);

@@ -26,6 +26,12 @@ export default function useTasks(lang) {
       setTasks(data);
       const alerts = await invoke("check_and_notify").catch((e) => console.error("check_and_notify:", e));
       if (alerts && alerts.length > 0) {
+        // In-app toast fallback — shows even if system notification denied
+        const msg = alerts.length <= 3
+          ? `🔔 ${alerts.join(", ")}`
+          : `🔔 ${alerts.length} ${t(lang, "reminders")}`;
+        setToast(msg);
+        setTimeout(() => setToast(null), 4000);
         // Refresh after notification updates last_reminded
         const fresh = await invoke("get_tasks");
         setTasks(fresh);

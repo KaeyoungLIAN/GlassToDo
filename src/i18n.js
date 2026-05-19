@@ -73,6 +73,7 @@ const i18n = {
     remindOnTime: "Remind on time",
     minAbbr: "min",
     advanceFormat: "{0} min early",
+    reminders: "reminders",
   },
   zh: {
     appName: "玻璃待办",
@@ -148,6 +149,7 @@ const i18n = {
     remindOnTime: "准时提醒",
     minAbbr: "分钟",
     advanceFormat: "提前{0}分钟",
+    reminders: "个提醒",
   },
 };
 

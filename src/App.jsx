@@ -74,7 +74,7 @@ export default function App() {
       try { await loadTasks(); } finally { locked = false; }
     };
     poll();
-    const iv = setInterval(poll, 60000);
+    const iv = setInterval(poll, 30000);
     return () => clearInterval(iv);
   }, [loadTasks]);
 
