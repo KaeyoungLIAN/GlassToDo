@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { t } from "../i18n";
 
-export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, lang, collapsed, onToggleCollapse }) {
+export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, lang, collapsed, onToggleCollapse, trashCount = 0, onOpenTrash }) {
   const [showHelp, setShowHelp] = useState(false);
   const [helpClosing, setHelpClosing] = useState(false);
   const helpRef = useRef(null);
@@ -55,6 +55,12 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
           </button>
         </div>
         <div id="title-controls">
+          <button className="title-btn" id="trash-btn" title={lang === "zh" ? "回收站" : "Trash"} onClick={onOpenTrash}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+            {trashCount > 0 && <span className="trash-badge">{trashCount > 9 ? "9+" : trashCount}</span>}
+          </button>
           <button className="title-btn" id="settings-btn" title={t(lang, "settings")} onClick={onOpenSettings}>
             <svg className="gear-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3" />
@@ -117,7 +123,7 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
               <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
-              <span>{lang === "zh" ? "编辑 / 删除：点铅笔编辑，回车保存；点垃圾桶删除，5 秒内可撤销" : "Edit / Delete: Pencil to edit, Enter to save. Trash to delete, 5 sec undo"}</span>
+              <span>{lang === "zh" ? "编辑 / 删除：点铅笔编辑，回车保存；点垃圾桶删除，可在回收站恢复" : "Edit / Delete: Pencil to edit, Enter to save. Trash to delete, recover from trash"}</span>
             </div>
             <div className="help-item">
               <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

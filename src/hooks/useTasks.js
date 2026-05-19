@@ -10,12 +10,10 @@ export default function useTasks(lang) {
   const [editRdata, setEditRdata] = useState(null);
   const [editLinkUrl, setEditLinkUrl] = useState("");
   const [toast, setToast] = useState(null);
-  const [undoId, setUndoId] = useState(null);
-  const [undoContent, setUndoContent] = useState("");
-  const [undoTask, setUndoTask] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [completingId, setCompletingId] = useState(null);
-  const undoTimerRef = useRef(null);
+  const [trash, setTrash] = useState([]);
+  const submitLockRef = useRef(false);
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -26,12 +24,26 @@ export default function useTasks(lang) {
     try {
       const data = await invoke("get_tasks");
       setTasks(data);
-      await invoke("check_and_notify").catch((e) => console.error("check_and_notify:", e));
+      const alerts = await invoke("check_and_notify").catch((e) => console.error("check_and_notify:", e));
+      if (alerts && alerts.length > 0) {
+        // Refresh after notification updates last_reminded
+        const fresh = await invoke("get_tasks");
+        setTasks(fresh);
+      }
     } catch (e) { console.error("loadTasks:", e); }
+  }, []);
+
+  const loadTrash = useCallback(async () => {
+    try {
+      const data = await invoke("get_trash");
+      setTrash(data);
+    } catch (e) { console.error("loadTrash:", e); }
   }, []);
 
   const addTask = useCallback(
     async (content, rtype, rdata, linkUrl) => {
+      if (submitLockRef.current) return;
+      submitLockRef.current = true;
       try {
         if (editingId !== null) {
           const original = tasks.find((x) => x.id === editingId);
@@ -48,17 +60,19 @@ export default function useTasks(lang) {
         await loadTasks();
       } catch (e) {
         showToast(t(lang, "error") + ": " + String(e));
+      } finally {
+        submitLockRef.current = false;
       }
     },
     [editingId, tasks, loadTasks, showToast, lang]
   );
 
   const deleteTask = useCallback(
-    async (id, content, taskData) => {
-      if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    async (id, _content, _taskData) => {
       setDeletingId(id);
       try {
         await invoke("delete_task", { id });
+        await loadTrash();
       } catch (e) {
         console.error("delete_task:", e);
         setDeletingId(null);
@@ -67,38 +81,29 @@ export default function useTasks(lang) {
       }
       setTasks((prev) => prev.filter((t) => t.id !== id));
       setDeletingId(null);
-      setUndoId(id);
-      setUndoContent(content.length > 30 ? content.slice(0, 30) + "..." : content);
-      setUndoTask(taskData);
-      undoTimerRef.current = setTimeout(() => {
-        setUndoId(null);
-        setUndoTask(null);
-        undoTimerRef.current = null;
-      }, 5000);
     },
-    [showToast, lang]
+    [showToast, loadTrash, lang]
   );
 
-  const cancelDelete = useCallback(async () => {
-    if (undoTimerRef.current) {
-      clearTimeout(undoTimerRef.current);
-      undoTimerRef.current = null;
+  const restoreFromTrash = useCallback(async (id) => {
+    try {
+      await invoke("restore_from_trash", { id });
+      await loadTrash();
+      await loadTasks();
+    } catch (e) {
+      console.error("restore_from_trash:", e);
+      showToast(t(lang, "error"));
     }
-    if (undoTask) {
-      try {
-        await invoke("add_task", {
-          content: undoTask.content,
-          reminderType: undoTask.reminder_type,
-          reminderData: undoTask.reminder_data,
-          linkUrl: undoTask.link_url || null,
-        });
-        showToast(t(lang, "deleteCancelled"));
-      } catch (e) { console.error("add_task (undo):", e); }
+  }, [loadTrash, loadTasks, showToast, lang]);
+
+  const emptyTrash = useCallback(async () => {
+    try {
+      await invoke("empty_trash");
+      setTrash([]);
+    } catch (e) {
+      console.error("empty_trash:", e);
     }
-    setUndoId(null);
-    setUndoTask(null);
-    await loadTasks();
-  }, [undoTask, showToast, loadTasks, lang]);
+  }, []);
 
   const toggleComplete = useCallback(
     async (id, showCompleted) => {
@@ -165,11 +170,11 @@ export default function useTasks(lang) {
 
   return {
     tasks, setTasks, loadTasks,
-    addTask, deleteTask, cancelDelete, toggleComplete,
+    addTask, deleteTask, toggleComplete,
     startEdit, cancelEdit, togglePin, togglePersist, handleReorder,
     editingId, editText, editRtype, editRdata, editLinkUrl,
     deletingId, completingId,
-    undoId, undoContent, onUndo: cancelDelete,
+    trash, loadTrash, restoreFromTrash, emptyTrash,
     toast, showToast, setToast,
   };
 }

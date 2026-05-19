@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import TaskCard from "./TaskCard";
 import { t } from "../i18n";
 
-export default function TaskList({ tasks, onToggle, onDelete, onEdit, onPin, onReorder, undoId, undoContent, onUndo, lang, deletingId, completingId, onTogglePersist, dateStr }) {
+export default function TaskList({ tasks, onToggle, onDelete, onEdit, onPin, onReorder, lang, deletingId, completingId, onTogglePersist, dateStr }) {
   const moveTask = useCallback((idx, direction) => {
     const targetIdx = idx + direction;
     if (targetIdx < 0 || targetIdx >= tasks.length) return;
@@ -33,12 +33,6 @@ export default function TaskList({ tasks, onToggle, onDelete, onEdit, onPin, onR
   return (
     <div id="task-area">
       <div id="task-list">
-        {undoId && (
-          <div className="undo-bar">
-            <span>{t(lang, "deletePrefix")}: {undoContent}</span>
-            <button className="undo-btn" onClick={onUndo}>{t(lang, "undo")}</button>
-          </div>
-        )}
         {tasks.map((t, i) => (
           <div key={t.id} className="drag-wrapper">
             <TaskCard

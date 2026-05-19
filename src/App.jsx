@@ -9,6 +9,7 @@ import TaskCard from "./components/TaskCard";
 import BottomPanel from "./components/BottomPanel";
 import SettingsModal from "./components/SettingsModal";
 import WelcomeModal from "./components/WelcomeModal";
+import TrashModal from "./components/TrashModal";
 import { t } from "./i18n";
 import useTasks from "./hooks/useTasks";
 import useDateNavigation from "./hooks/useDateNavigation";
@@ -27,6 +28,7 @@ export default function App() {
   const [collapsed, setCollapsed] = useState(false);
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
   const [glassEffect, setGlassEffect] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
 
   const COLLAPSED_HEIGHT = 40;
   const COLLAPSED_WIDTH = 240;
@@ -37,7 +39,7 @@ export default function App() {
     startEdit, cancelEdit, togglePin, togglePersist, handleReorder,
     editingId, editText, editRtype, editRdata, editLinkUrl,
     deletingId, completingId,
-    undoId, undoContent, onUndo, toast, showToast,
+    trash, loadTrash, restoreFromTrash, emptyTrash, toast, showToast,
   } = taskApi;
 
   const nav = useDateNavigation(taskApi.tasks);
@@ -197,6 +199,8 @@ export default function App() {
         lang={lang}
         collapsed={collapsed}
         onToggleCollapse={handleToggleCollapse}
+        trashCount={trash.length}
+        onOpenTrash={() => { loadTrash(); setShowTrash(true); }}
       />
       <DateBar
         dateStr={dateStr}
@@ -273,9 +277,6 @@ export default function App() {
           onPin={togglePin}
           onReorder={handleReorder}
           onTogglePersist={togglePersist}
-          undoId={undoId}
-          undoContent={undoContent}
-          onUndo={onUndo}
           lang={lang}
           deletingId={deletingId}
           completingId={completingId}
@@ -319,6 +320,15 @@ export default function App() {
               invoke("update_settings", { settings: { ...s, show_welcome: newVal } });
             }).catch(console.error);
           }}
+        />
+      )}
+      {showTrash && (
+        <TrashModal
+          lang={lang}
+          trash={trash}
+          onClose={() => setShowTrash(false)}
+          onRestore={restoreFromTrash}
+          onEmpty={emptyTrash}
         />
       )}
     </>

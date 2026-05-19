@@ -35,7 +35,12 @@ pub struct TaskItem {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct TodoData { pub tasks: Vec<TaskItem>, pub next_id: u32 }
+pub struct TodoData {
+    pub tasks: Vec<TaskItem>,
+    pub next_id: u32,
+    #[serde(default)]
+    pub trash: Vec<TaskItem>,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
@@ -110,6 +115,13 @@ fn load_tasks(path: &PathBuf) -> TodoData {
             if let Ok(d) = serde_json::from_str(&c) { return d; }
         }
     }
+    // Try backup file if primary fails
+    let bak = path.with_extension("json.bak");
+    if bak.exists() {
+        if let Ok(c) = fs::read_to_string(&bak) {
+            if let Ok(d) = serde_json::from_str(&c) { return d; }
+        }
+    }
     TodoData::default()
 }
 
@@ -118,6 +130,7 @@ fn save_tasks(path: &PathBuf, data: &TodoData) -> Result<(), String> {
     let tmp = path.with_extension("json.tmp");
     fs::write(&tmp, &json).map_err(|e| e.to_string())?;
     fs::rename(&tmp, path).map_err(|e| e.to_string())?;
+    fs::copy(path, path.with_extension("json.bak")).ok();
     Ok(())
 }
 
@@ -134,6 +147,7 @@ fn load_tasks_with_settings(app: &AppHandle) -> (PathBuf, TodoData) {
 fn modify_tasks<F>(state: &State<AppState>, app: &AppHandle, f: F) -> Result<(), String>
 where F: FnOnce(&mut Vec<TaskItem>)
 {
+    let _lock = state.file_mutex.lock().map_err(|e| e.to_string())?;
     let (path, mut data) = load_tasks_with_settings(app);
     f(&mut data.tasks);
     save_tasks(&path, &data)?;
@@ -163,6 +177,8 @@ fn is_reminder_due(task: &TaskItem, now: NaiveDateTime) -> bool {
         "weekly" => {
             let wd = now.weekday().num_days_from_sunday() as u8;
             if !task.reminder_data.days.contains(&wd) { return false; }
+            let today = now.format("%Y-%m-%d").to_string();
+            if task.completed_dates.contains(&today) { return false; }
             let rt = match NaiveTime::parse_from_str(&task.reminder_data.time, "%H:%M") {
                 Ok(t) => t,
                 Err(_) => return false,
@@ -292,9 +308,17 @@ fn update_task(state: State<'_, AppState>, app: AppHandle, task: TaskItem) -> Re
 
 #[tauri::command]
 fn delete_task(state: State<'_, AppState>, app: AppHandle, id: u32) -> Result<(), String> {
-    modify_tasks(&state, &app, |tasks| {
-        tasks.retain(|t| t.id != id);
-    })
+    let (path, mut data) = load_tasks_with_settings(&app);
+    if let Some(pos) = data.tasks.iter().position(|t| t.id == id) {
+        let task = data.tasks.remove(pos);
+        data.trash.push(task);
+        if data.trash.len() > 10 {
+            data.trash.drain(..data.trash.len() - 10);
+        }
+    }
+    save_tasks(&path, &data)?;
+    *state.data.lock().map_err(|e| e.to_string())? = data.tasks;
+    Ok(())
 }
 
 #[tauri::command]
@@ -318,6 +342,16 @@ fn toggle_complete(state: State<'_, AppState>, app: AppHandle, id: u32) -> Resul
 
 #[tauri::command]
 fn check_and_notify(state: State<'_, AppState>, app: AppHandle) -> Result<Vec<String>, String> {
+    use tauri_plugin_notification::NotificationExt;
+    match app.notification().permission().state() {
+        tauri_plugin_notification::PermissionState::Denied => {
+            return Ok(vec![]);
+        }
+        tauri_plugin_notification::PermissionState::NotDetermined => {
+            let _ = app.notification().permission().request();
+        }
+        _ => {}
+    }
     let (path, mut data) = load_tasks_with_settings(&app);
     let alerts = notify_due_tasks(&app, &data.tasks);
     update_last_reminded(&mut data.tasks);
@@ -337,7 +371,39 @@ fn reorder_tasks(state: State<'_, AppState>, app: AppHandle, ids: Vec<u32>) -> R
     })
 }
 
-struct AppState { data: Mutex<Vec<TaskItem>> }
+// ── Trash commands ──
+
+#[tauri::command]
+fn get_trash(state: State<'_, AppState>, _app: AppHandle) -> Result<Vec<TaskItem>, String> {
+    let (_path, data) = load_tasks_with_settings(&_app);
+    Ok(data.trash)
+}
+
+#[tauri::command]
+fn restore_from_trash(state: State<'_, AppState>, app: AppHandle, id: u32) -> Result<(), String> {
+    let (path, mut data) = load_tasks_with_settings(&app);
+    if let Some(pos) = data.trash.iter().position(|t| t.id == id) {
+        let task = data.trash.remove(pos);
+        data.tasks.push(task);
+        if id >= data.next_id {
+            data.next_id = id + 1;
+        }
+    }
+    save_tasks(&path, &data)?;
+    *state.data.lock().map_err(|e| e.to_string())? = data.tasks;
+    Ok(())
+}
+
+#[tauri::command]
+fn empty_trash(state: State<'_, AppState>, app: AppHandle) -> Result<(), String> {
+    let (path, mut data) = load_tasks_with_settings(&app);
+    data.trash.clear();
+    save_tasks(&path, &data)?;
+    *state.data.lock().map_err(|e| e.to_string())? = data.tasks;
+    Ok(())
+}
+
+struct AppState { data: Mutex<Vec<TaskItem>>, file_mutex: Mutex<()> }
 
 /// Open a URL using the system protocol handler.
 #[tauri::command]
@@ -378,7 +444,7 @@ pub fn run() {
             let settings = load_settings(&s_path);
             let path = data_path(&app.handle(), &settings);
             let data = load_tasks(&path);
-            app.manage(AppState { data: Mutex::new(data.tasks.clone()) });
+            app.manage(AppState { data: Mutex::new(data.tasks.clone()), file_mutex: Mutex::new(()) });
 
             if let Some(w) = app.get_webview_window("main") {
 
@@ -405,6 +471,7 @@ pub fn run() {
             get_tasks, add_task, update_task, delete_task, toggle_complete, check_and_notify,
             get_settings, update_settings, pick_directory, reorder_tasks,
             minimize_window, open_url, set_glass_effect,
+            get_trash, restore_from_trash, empty_trash,
         ])
         .run(tauri::generate_context!())
         .expect("error running GlassTodo");
