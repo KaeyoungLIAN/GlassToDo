@@ -467,7 +467,18 @@ pub fn run() {
             let s_path = settings_path(&app.handle());
             let settings = load_settings(&s_path);
             let path = data_path(&app.handle(), &settings);
-            let data = load_tasks(&path);
+            let mut data = load_tasks(&path);
+            // Backfill completed_at for old completed non-weekly tasks
+            let mut backfilled = false;
+            for t in data.tasks.iter_mut() {
+                if t.completed && t.completed_at.is_none() && t.reminder_type != "weekly" {
+                    t.completed_at = Some(t.created_at[..10].to_string());
+                    backfilled = true;
+                }
+            }
+            if backfilled {
+                save_tasks(&path, &data).ok();
+            }
             app.manage(AppState { data: Mutex::new(data.tasks.clone()), file_mutex: Mutex::new(()) });
 
             if let Some(w) = app.get_webview_window("main") {
