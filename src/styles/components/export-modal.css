@@ -1,95 +1,228 @@
-/* ── Export Modal (完成记录) ── */
+/* ── Export Modal ── */
 .export-modal {
-  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  z-index: 200; width: min(480px, calc(100vw - 32px)); max-height: 80vh;
-  display: flex; flex-direction: column;
-  background: var(--bg-modal); backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid var(--border-glass);
-  box-shadow: inset 0 1px 0 var(--border-glass-inner), 0 8px 32px var(--shadow-color);
-  border-radius: 14px; overflow: hidden;
-  animation: modal-enter 300ms var(--curve-lift) both;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 480px;
+  max-width: 90vw;
+  max-height: 80vh;
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  z-index: 1001;
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.theme-light .export-modal {
+  background: #f5f5f7;
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 .export-modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px; border-bottom: 1px solid var(--border-glass);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
+
+.theme-light .export-modal-header {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
 .export-modal-header h2 {
-  font-size: 14px; font-weight: 600; color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
 }
+
 .export-modal-close {
-  background: none; border: none; color: var(--text-tertiary);
-  cursor: pointer; padding: 4px; border-radius: 4px;
-  display: flex; align-items: center;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  transition: color 150ms, background 150ms;
 }
-.export-modal-close:hover { color: var(--text-primary); background: var(--bg-hover); }
+.export-modal-close:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
 
+.theme-light .export-modal-close { color: rgba(0, 0, 0, 0.4); }
+.theme-light .export-modal-close:hover { color: #000; background: rgba(0, 0, 0, 0.06); }
+
+/* ── Date range picker ── */
 .export-modal-dates {
-  display: flex; align-items: flex-end; gap: 8px;
-  padding: 14px 16px; border-bottom: 1px solid var(--border-glass-soft);
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
+
+.theme-light .export-modal-dates {
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
 .export-date-field {
-  flex: 1; display: flex; flex-direction: column; gap: 4px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
+
 .export-date-field label {
-  font-size: 10px; color: var(--text-tertiary); text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
-.export-date-input {
-  width: 100%; padding: 6px 8px; border: 1px solid var(--border-glass);
-  border-radius: 6px; background: var(--bg-input);
-  color: var(--text-primary); font-size: 12px; font-family: inherit;
+
+.theme-light .export-date-field label {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.export-date-field input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #fff;
   outline: none;
+  font-family: inherit;
+  transition: border-color 150ms;
 }
-.export-date-input:focus { border-color: var(--accent); }
-.export-date-sep {
-  color: var(--text-tertiary); font-size: 13px; padding-bottom: 7px;
+.export-date-field input:focus {
+  border-color: #10b981;
 }
-
-.export-modal-summary {
-  padding: 10px 16px; font-size: 12px; color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-glass-soft);
-  background: var(--bg-surface);
+.export-date-field input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
-.export-modal-summary strong { color: var(--text-primary); }
-
-.export-modal-list {
-  flex: 1; overflow-y: auto; padding: 8px 16px;
-  max-height: 40vh;
+.export-date-field input::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
 }
 
-.export-day-group {
-  margin-bottom: 12px;
+.theme-light .export-date-field input {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #000;
 }
-.export-day-label {
-  font-size: 11px; font-weight: 500; color: var(--text-secondary);
-  padding: 4px 0 6px; border-bottom: 1px solid var(--border-glass-soft);
-  margin-bottom: 4px;
+.theme-light .export-date-field input:focus {
+  border-color: #10b981;
 }
+.theme-light .export-date-field input::-webkit-calendar-picker-indicator {
+  filter: none;
+}
+
+/* ── Summary ── */
+.export-summary {
+  padding: 8px 20px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.theme-light .export-summary {
+  color: rgba(0, 0, 0, 0.45);
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+/* ── Group list ── */
+.export-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.export-date-group {
+  padding: 8px 20px;
+}
+
+.export-date-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.theme-light .export-date-label {
+  color: rgba(0, 0, 0, 0.3);
+}
+
 .export-item {
-  display: flex; align-items: center; gap: 6px;
-  padding: 3px 0;
-}
-.export-item-check {
-  font-size: 12px; flex-shrink: 0;
-}
-.export-item-text {
-  font-size: 12px; color: var(--text-primary);
-}
-.export-empty {
-  text-align: center; padding: 32px 0; font-size: 12px;
-  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
 }
 
+.export-item-check {
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.export-item-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.theme-light .export-item-text {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.export-empty {
+  padding: 48px 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.32);
+  font-size: 14px;
+}
+
+.theme-light .export-empty { color: rgba(0, 0, 0, 0.32); }
+
+/* ── Actions ── */
 .export-modal-actions {
-  display: flex; gap: 8px; padding: 12px 16px;
-  border-top: 1px solid var(--border-glass);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
+
+.theme-light .export-modal-actions {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
 .export-btn {
-  flex: 1; padding: 7px 0; border: 1px solid var(--border-glass);
-  border-radius: 8px; background: var(--bg-surface);
-  color: var(--text-primary); font-size: 12px; font-family: inherit;
-  cursor: pointer; transition: all 200ms var(--ease-out);
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms, transform 150ms;
+  font-family: inherit;
 }
-.export-btn:hover { border-color: var(--accent); color: var(--accent); }
+.export-btn:hover { background: rgba(16, 185, 129, 0.25); }
+.export-btn:active { transform: scale(0.95); }
+
+/* ── Titlebar export button ── */
+#export-btn {
+  position: relative;
+}

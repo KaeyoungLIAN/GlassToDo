@@ -35,7 +35,7 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
   return (
     <>
       <div id="titlebar" data-tauri-drag-region>
-        <div id="title-left">
+    <div id="title-left">
           <span id="title-dot" />
           <span id="title-text">GlassTodo</span>
           <button
@@ -48,18 +48,18 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
               <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
           </button>
-          <button className={"title-btn search-toggle" + (showSearch ? " active" : "")} id="search-toggle-btn" title={t(lang, "search")} onClick={onToggleSearch}>
+          <button className={("title-btn search-toggle") + (showSearch ? " active" : "")} id="search-toggle-btn" title={t(lang, "search")} onClick={onToggleSearch}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
           </button>
-        </div>
-        <div id="title-controls">
-          <button className="title-btn" id="export-btn" title={lang === "zh" ? "完成记录" : "Completion Report"} onClick={onOpenExport}>
+          <button className="title-btn" id="export-btn" title={t(lang, "exportRecord")} onClick={onOpenExport}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
             </svg>
           </button>
+        </div>
+        <div id="title-controls">
           <button className="title-btn" id="trash-btn" title={lang === "zh" ? "回收站" : "Trash"} onClick={onOpenTrash}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />

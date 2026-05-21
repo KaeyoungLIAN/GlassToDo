@@ -339,6 +339,7 @@ export default function App() {
           lang={lang}
           tasks={taskApi.tasks}
           onClose={() => setShowExport(false)}
+          showToast={showToast}
         />
       )}
     </>

@@ -32,6 +32,8 @@ pub struct TaskItem {
     pub completed_dates: Vec<String>,
     #[serde(default)]
     pub link_url: Option<String>,
+    #[serde(default)]
+    pub completed_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -267,6 +269,23 @@ fn pick_directory(app: AppHandle) -> Result<Option<String>, String> {
     Ok(file.map(|p| p.to_string()))
 }
 
+#[tauri::command]
+fn save_export(app: AppHandle, text: String) -> Result<String, String> {
+    use tauri_plugin_dialog::DialogExt;
+    let path = app.dialog()
+        .file()
+        .add_filter("Text", &["txt"])
+        .set_file_name("GlassToDo_export.txt")
+        .blocking_save_file();
+    match path {
+        Some(p) => {
+            std::fs::write(p.as_path(), &text).map_err(|e| e.to_string())?;
+            Ok(p.to_string())
+        }
+        None => Err("Saved cancelled".to_string()),
+    }
+}
+
 // ── Window commands ──
 
 #[tauri::command]
@@ -297,6 +316,7 @@ fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
         created_at: Local::now().format("%Y-%m-%dT%H:%M:%S").to_string(),
         completed_dates: Vec::new(),
         link_url,
+        completed_at: None,
     };
     data.next_id += 1;
     let _task_id = task.id;
@@ -343,6 +363,11 @@ fn toggle_complete(state: State<'_, AppState>, app: AppHandle, id: u32) -> Resul
                     t.last_reminded = Some(today);
                 }
             } else {
+                if t.completed {
+                    t.completed_at = None;
+                } else {
+                    t.completed_at = Some(Local::now().format("%Y-%m-%d").to_string());
+                }
                 t.completed = !t.completed;
             }
         }
@@ -468,7 +493,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_tasks, add_task, update_task, delete_task, toggle_complete, check_and_notify,
-            get_settings, update_settings, pick_directory, reorder_tasks,
+            get_settings, update_settings, pick_directory, save_export, reorder_tasks,
             minimize_window, open_url, set_glass_effect,
             get_trash, restore_from_trash, empty_trash,
         ])
