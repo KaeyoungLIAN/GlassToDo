@@ -4,7 +4,7 @@ import { t } from "../i18n";
 export default function TrashModal({ lang, trash, onClose, onRestore, onEmpty }) {
   return (
     <>
-      <div className="modal-overlay" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }} aria-label="Close" />
+      <div className="modal-overlay" onClick={onClose} />
       <div className="trash-modal">
         <div className="trash-modal-header">
           <h2>{lang === "zh" ? "回收站" : "Trash"}</h2>

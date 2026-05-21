@@ -94,7 +94,6 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
           ref={helpRef}
           className={"help-popover" + (helpClosing ? " closing" : " open")}
           onClick={(e) => e.stopPropagation()}
-          role="dialog"
         >
           <div className="help-popover-title">{lang === "zh" ? "操作说明" : "Quick guide"}</div>
           <div className="help-popover-list">

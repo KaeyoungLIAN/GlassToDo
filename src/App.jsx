@@ -5,11 +5,11 @@ import TitleBar from "./components/TitleBar";
 import CollapsedBar from "./components/CollapsedBar";
 import DateBar from "./components/DateBar";
 import TaskList from "./components/TaskList";
+import TaskCard from "./components/TaskCard";
 import BottomPanel from "./components/BottomPanel";
 import SettingsModal from "./components/SettingsModal";
 import WelcomeModal from "./components/WelcomeModal";
 import TrashModal from "./components/TrashModal";
-import SearchOverlay from "./components/SearchOverlay";
 import { t } from "./i18n";
 import useTasks from "./hooks/useTasks";
 import useDateNavigation from "./hooks/useDateNavigation";
@@ -27,8 +27,7 @@ export default function App() {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
-  const glassEffectRef = useRef(false);
-  const [glassTick, setGlassTick] = useState(0);
+  const [glassEffect, setGlassEffect] = useState(false);
   const [showTrash, setShowTrash] = useState(false);
 
   const COLLAPSED_HEIGHT = 40;
@@ -62,10 +61,7 @@ export default function App() {
         } else {
           setShowWelcome(false);
         }
-        if (s.glass_effect !== undefined) {
-          glassEffectRef.current = s.glass_effect;
-          setGlassTick((t) => t + 1);
-        }
+        if (s.glass_effect !== undefined) setGlassEffect(s.glass_effect);
       })
       .catch((e) => console.error("get_settings:", e));
   }, []);
@@ -93,11 +89,10 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    const enabled = glassEffectRef.current;
-    document.documentElement.classList.toggle("no-glass", !enabled);
+    document.documentElement.classList.toggle("no-glass", !glassEffect);
     // Apply or clear DWM acrylic via Rust command (reliable, no JS import issues)
-    invoke("set_glass_effect", { enabled }).catch(() => {});
-  }, [glassTick]);
+    invoke("set_glass_effect", { enabled: glassEffect }).catch(() => {});
+  }, [glassEffect]);
 
   // ── Filtered tasks ──
   const filtered = useMemo(() => taskApi.tasks
@@ -121,10 +116,7 @@ export default function App() {
     if (showComp !== undefined) setShowCompleted(showComp);
     if (newTheme) setTheme(newTheme);
     if (showWelcomeVal !== undefined) setShowWelcome(showWelcomeVal);
-    if (newGlass !== undefined) {
-      glassEffectRef.current = newGlass;
-      setGlassTick((t) => t + 1);
-    }
+    if (newGlass !== undefined) setGlassEffect(newGlass);
   }, []);
 
   const handleEmptySubmit = useCallback(() => {
@@ -223,21 +215,58 @@ export default function App() {
         weekCompleted={weekCompleted}
       />
       {showSearch ? (
-        <SearchOverlay
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          searchResults={searchResults}
-          toggleComplete={toggleComplete}
-          deleteTask={deleteTask}
-          startEdit={startEdit}
-          togglePin={togglePin}
-          togglePersist={togglePersist}
-          lang={lang}
-          showCompleted={showCompleted}
-          setShowSearch={setShowSearch}
-          deletingId={deletingId}
-          completingId={completingId}
-        />
+        <div className="search-overlay">
+          <div className={"search-overlay-header" + (searchQuery ? " has-query" : "")}>
+            <svg className="search-overlay-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              className="search-overlay-input"
+              type="text"
+              placeholder={t(lang, "searchPlaceholder")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+            />
+            {searchQuery && (
+              <button className="search-overlay-close" onClick={() => { setSearchQuery(""); setShowSearch(false); }} title={t(lang, "close")}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="search-overlay-results">
+              {searchResults.length === 0 ? (
+                <div className="search-overlay-empty">{t(lang, "noTasks")}</div>
+              ) : (
+                searchResults.map(([date, stasks]) => (
+                  <div key={date} className="search-date-group">
+                    <div className="search-date-label">{date}</div>
+                    {stasks.map((t) => (
+                      <TaskCard
+                        key={t.id}
+                        task={t}
+                        dateStr={date}
+                        index={0}
+                        onToggle={(id) => toggleComplete(id, showCompleted)}
+                        onDelete={deleteTask}
+                        onEdit={startEdit}
+                        onPin={togglePin}
+                        onTogglePersist={togglePersist}
+                        lang={lang}
+                        deletingId={deletingId}
+                        completingId={completingId}
+                        reorder={null}
+                      />
+                    ))}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
       ) : (
         <TaskList
           tasks={filtered}

@@ -1,34 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { t } from "../i18n";
 
-function ValueCell({ field, valueStr, editing, rawText, inputRef, onEdit, onWheel, onInputChange, onKeyDown, onBlur, setter, maxVal }) {
-  if (editing === field) {
-    return (
-      <input
-        ref={inputRef}
-        className="timepicker-input"
-        type="text"
-        inputMode="numeric"
-        value={rawText}
-        onChange={(e) => onInputChange(e, setter, maxVal)}
-        onKeyDown={onKeyDown}
-        onBlur={onBlur}
-        maxLength={2}
-        autoComplete="off"
-      />
-    );
-  }
-  return (
-    <button type="button"
-      className="timepicker-value"
-      onClick={() => onEdit(field)}
-      onWheel={onWheel}
-    >
-      {valueStr}
-    </button>
-  );
-}
-
 /**
  * TimePicker — Custom time picker replacing <input type="time">
  * Props: value (string "HH:MM"), onChange (fn)
@@ -139,13 +111,40 @@ export default function TimePicker({ value, onChange, lang }) {
     }
   };
 
-  const handleEdit = (field) => {
-    setEditing(field);
-    setRawText(field === "hour" ? String(editHour) : String(editMin));
-  };
-
   const hStr = String(editHour).padStart(2, "0");
   const mStr = String(editMin).padStart(2, "0");
+
+  const renderValueCell = (field, valueStr, setter, maxVal) => {
+    if (editing === field) {
+      // During edit: show raw text (unpadded) so user sees exactly what they typed
+      return (
+        <input
+          ref={inputRef}
+          className="timepicker-input"
+          type="text"
+          inputMode="numeric"
+          value={rawText}
+          onChange={(e) => handleInputChange(e, setter, maxVal)}
+          onKeyDown={(e) => handleInputKeyDown(e, field)}
+          onBlur={() => setEditing(null)}
+          maxLength={2}
+          autoComplete="off"
+        />
+      );
+    }
+    return (
+      <span
+        className="timepicker-value"
+        onClick={() => {
+          setEditing(field);
+          setRawText(field === "hour" ? String(editHour) : String(editMin));
+        }}
+        onWheel={handleWheel(setter, maxVal)}
+      >
+        {valueStr}
+      </span>
+    );
+  };
 
   return (
     <div className="timepicker-wrapper" ref={wrapperRef}>
@@ -177,20 +176,7 @@ export default function TimePicker({ value, onChange, lang }) {
                   <polyline points="18 15 12 9 6 15" />
                 </svg>
               </button>
-              <ValueCell
-                field="hour"
-                valueStr={hStr}
-                editing={editing}
-                rawText={rawText}
-                inputRef={inputRef}
-                onEdit={handleEdit}
-                onWheel={handleWheel(setEditHour, 24)}
-                onInputChange={handleInputChange}
-                onKeyDown={(e) => handleInputKeyDown(e, "hour")}
-                onBlur={() => setEditing(null)}
-                setter={setEditHour}
-                maxVal={24}
-              />
+              {renderValueCell("hour", hStr, setEditHour, 24)}
               <button
                 type="button"
                 className="timepicker-arrow"
@@ -217,20 +203,7 @@ export default function TimePicker({ value, onChange, lang }) {
                   <polyline points="18 15 12 9 6 15" />
                 </svg>
               </button>
-              <ValueCell
-                field="minute"
-                valueStr={mStr}
-                editing={editing}
-                rawText={rawText}
-                inputRef={inputRef}
-                onEdit={handleEdit}
-                onWheel={handleWheel(setEditMin, 60)}
-                onInputChange={handleInputChange}
-                onKeyDown={(e) => handleInputKeyDown(e, "minute")}
-                onBlur={() => setEditing(null)}
-                setter={setEditMin}
-                maxVal={60}
-              />
+              {renderValueCell("minute", mStr, setEditMin, 60)}
               <button
                 type="button"
                 className="timepicker-arrow"

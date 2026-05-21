@@ -46,7 +46,7 @@ export default function SettingsModal({ lang, theme, showCompleted, showWelcome,
 
   if (loading) {
     return (
-      <div className="modal-overlay" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }} aria-label="Close">
+      <div className="modal-overlay" onClick={onClose}>
         <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
           <div className="settings-loading" />
         </div>
@@ -57,7 +57,7 @@ export default function SettingsModal({ lang, theme, showCompleted, showWelcome,
   const langs = availableLangs();
 
   return (
-    <div className="modal-overlay" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }} aria-label="Close">
+    <div className="modal-overlay" onClick={onClose}>
       <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
         <div className="settings-header">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -87,34 +87,34 @@ export default function SettingsModal({ lang, theme, showCompleted, showWelcome,
           {/* Show completed tasks */}
           <div className="settings-field">
             <label className="settings-label">{t(settings.language, "showCompleted")}</label>
-            <div className="toggle-row" onClick={toggleShowCompleted} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleShowCompleted(); }}>
+            <label className="toggle-row" onClick={toggleShowCompleted}>
               <div className={`toggle-track${settings.show_completed ? " on" : ""}`}>
                 <div className="toggle-thumb" />
               </div>
               <span className="toggle-label">{settings.show_completed ? t(settings.language, "yes") : t(settings.language, "no")}</span>
-            </div>
+            </label>
           </div>
 
           {/* Show welcome guide */}
           <div className="settings-field">
             <label className="settings-label">{t(settings.language, "showWelcome")}</label>
-            <div className="toggle-row" onClick={() => update({ ...settings, show_welcome: !settings.show_welcome })} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') update({ ...settings, show_welcome: !settings.show_welcome }); }}>
+            <label className="toggle-row" onClick={() => update({ ...settings, show_welcome: !settings.show_welcome })}>
               <div className={`toggle-track${settings.show_welcome ? " on" : ""}`}>
                 <div className="toggle-thumb" />
               </div>
               <span className="toggle-label">{settings.show_welcome ? t(settings.language, "yes") : t(settings.language, "no")}</span>
-            </div>
+            </label>
           </div>
 
           {/* Glass effect */}
           <div className="settings-field">
             <label className="settings-label">{t(settings.language, "glassEffect")}</label>
-            <div className="toggle-row" onClick={() => update({ ...settings, glass_effect: !settings.glass_effect })} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') update({ ...settings, glass_effect: !settings.glass_effect }); }}>
+            <label className="toggle-row" onClick={() => update({ ...settings, glass_effect: !settings.glass_effect })}>
               <div className={`toggle-track${settings.glass_effect ? " on" : ""}`}>
                 <div className="toggle-thumb" />
               </div>
               <span className="toggle-label">{settings.glass_effect ? t(settings.language, "yes") : t(settings.language, "no")}</span>
-            </div>
+            </label>
             {settings.glass_effect && (
               <div className="settings-hint">{t(settings.language, "glassEffectWarning")}</div>
             )}

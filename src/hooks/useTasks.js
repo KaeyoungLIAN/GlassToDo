@@ -94,7 +94,8 @@ export default function useTasks(lang) {
   const restoreFromTrash = useCallback(async (id) => {
     try {
       await invoke("restore_from_trash", { id });
-      await Promise.all([loadTrash(), loadTasks()]);
+      await loadTrash();
+      await loadTasks();
     } catch (e) {
       console.error("restore_from_trash:", e);
       showToast(t(lang, "error"));
