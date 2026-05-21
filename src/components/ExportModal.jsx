@@ -19,8 +19,8 @@ export default function ExportModal({ lang, tasks, onClose, showToast }) {
   const groups = useMemo(() => {
     const map = {};
     tasks.forEach((task) => {
-      // Weekly tasks: dates from completed_dates
       if (task.reminder_type === "weekly") {
+        // Weekly tasks: dates from completed_dates
         const dates = task.completed_dates || [];
         dates.forEach((d) => {
           if (d >= startDate && d <= endDate) {
@@ -28,6 +28,21 @@ export default function ExportModal({ lang, tasks, onClose, showToast }) {
             map[d].push(task);
           }
         });
+      } else if (task.persist && task.completed && task.completed_at) {
+        // Persisted tasks: show on each day from creation to completion
+        const start = task.created_at.slice(0, 10);
+        const end = task.completed_at;
+        if (start > endDate || end < startDate) return;
+        const d = new Date(start);
+        const endD = new Date(end);
+        while (d <= endD) {
+          const ds = d.toISOString().slice(0, 10);
+          if (ds >= startDate && ds <= endDate) {
+            if (!map[ds]) map[ds] = [];
+            map[ds].push(task);
+          }
+          d.setDate(d.getDate() + 1);
+        }
       } else {
         // Regular / cron tasks: use completed_at
         if (task.completed && task.completed_at && task.completed_at >= startDate && task.completed_at <= endDate) {

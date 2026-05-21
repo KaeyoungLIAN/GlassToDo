@@ -253,7 +253,7 @@ export default function App() {
                         task={t}
                         dateStr={date}
                         index={0}
-                        onToggle={(id) => toggleComplete(id, showCompleted)}
+                        onToggle={(id) => toggleComplete(id, showCompleted, dateStr)}
                         onDelete={deleteTask}
                         onEdit={startEdit}
                         onPin={togglePin}
@@ -274,7 +274,7 @@ export default function App() {
         <TaskList
           tasks={filtered}
           dateStr={dateStr}
-          onToggle={(id) => toggleComplete(id, showCompleted)}
+          onToggle={(id) => toggleComplete(id, showCompleted, dateStr)}
           onDelete={deleteTask}
           onEdit={startEdit}
           onPin={togglePin}

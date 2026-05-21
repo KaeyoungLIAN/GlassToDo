@@ -351,7 +351,7 @@ fn delete_task(state: State<'_, AppState>, app: AppHandle, id: u32) -> Result<()
 }
 
 #[tauri::command]
-fn toggle_complete(state: State<'_, AppState>, app: AppHandle, id: u32) -> Result<(), String> {
+fn toggle_complete(state: State<'_, AppState>, app: AppHandle, id: u32, date: Option<String>) -> Result<(), String> {
     modify_tasks(&state, &app, |tasks| {
         if let Some(t) = tasks.iter_mut().find(|t| t.id == id) {
             if t.reminder_type == "weekly" {
@@ -363,10 +363,11 @@ fn toggle_complete(state: State<'_, AppState>, app: AppHandle, id: u32) -> Resul
                     t.last_reminded = Some(today);
                 }
             } else {
+                let completion_date = date.unwrap_or_else(|| Local::now().format("%Y-%m-%d").to_string());
                 if t.completed {
                     t.completed_at = None;
                 } else {
-                    t.completed_at = Some(Local::now().format("%Y-%m-%d").to_string());
+                    t.completed_at = Some(completion_date);
                 }
                 t.completed = !t.completed;
             }

@@ -112,9 +112,10 @@ export default function useTasks(lang) {
   }, []);
 
   const toggleComplete = useCallback(
-    async (id, showCompleted) => {
+    async (id, showCompleted, completionDate) => {
       try {
-        await invoke("toggle_complete", { id });
+        const params = completionDate ? { id, date: completionDate } : { id };
+        await invoke("toggle_complete", params);
         if (!showCompleted) {
           setCompletingId(id);
           setTimeout(() => { loadTasks(); setCompletingId(null); }, 500);
