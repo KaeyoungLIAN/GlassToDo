@@ -279,7 +279,7 @@ fn save_export(app: AppHandle, text: String) -> Result<String, String> {
         .blocking_save_file();
     match path {
         Some(p) => {
-            std::fs::write(p.as_path(), &text).map_err(|e| e.to_string())?;
+            std::fs::write(&*p, &text).map_err(|e| e.to_string())?;
             Ok(p.to_string())
         }
         None => Err("Saved cancelled".to_string()),
