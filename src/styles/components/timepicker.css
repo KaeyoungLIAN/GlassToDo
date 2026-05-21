@@ -77,12 +77,13 @@
 /* ── Advance reminder (提前提醒) ── */
 .advance-wrapper { position: relative; display: inline-flex; flex-shrink: 0 }
 .advance-trigger {
-  display: flex; align-items: center; gap: 4px; padding: 5px 10px;
+  display: flex; align-items: center; gap: 4px; padding: 5px 16px;
   background: var(--bg-input); border: 1px solid var(--border-glass);
   border-radius: 4px; color: var(--text-secondary); font-size: 11px;
   font-family: inherit; cursor: pointer; outline: none;
   transition: border-color 200ms var(--ease-out), transform var(--transition-fast);
-  white-space: nowrap; line-height: 1; flex: none;
+  white-space: nowrap; line-height: 1; flex: none; min-width: 100px;
+  justify-content: center;
 }
 .advance-trigger:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-1px) }
 .advance-trigger svg { opacity: 0.45; flex-shrink: 0; width: 10px; height: 10px }
@@ -95,7 +96,7 @@
   border-radius: 8px; padding: 4px;
   animation: picker-enter 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
   transform-origin: bottom center;
-  min-width: 72px;
+  min-width: 120px;
 }
 .advance-option {
   display: block; width: 100%; padding: 5px 10px; border: none; border-radius: 4px;
