@@ -74,6 +74,17 @@ const i18n = {
     minAbbr: "min",
     advanceFormat: "{0} min early",
     reminders: "reminders",
+
+    // Export
+    completionRecord: "Completion Record",
+    startDate: "Start",
+    endDate: "End",
+    totalCompleted: "Total completed",
+    noCompletedInRange: "No completed tasks in this range",
+    copyText: "Copy Report",
+    saveFile: "Save as File",
+    copied: "Copied!",
+    items: "items",
   },
   zh: {
     appName: "玻璃待办",
@@ -150,6 +161,17 @@ const i18n = {
     minAbbr: "分钟",
     advanceFormat: "提前{0}分钟",
     reminders: "个提醒",
+
+    // Export
+    completionRecord: "完成记录",
+    startDate: "起始日期",
+    endDate: "结束日期",
+    totalCompleted: "共计完成",
+    noCompletedInRange: "该时间段内没有完成任务",
+    copyText: "复制文本",
+    saveFile: "保存文件",
+    copied: "已复制！",
+    items: "项",
   },
 };
 

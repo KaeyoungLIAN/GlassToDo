@@ -10,6 +10,7 @@ import BottomPanel from "./components/BottomPanel";
 import SettingsModal from "./components/SettingsModal";
 import WelcomeModal from "./components/WelcomeModal";
 import TrashModal from "./components/TrashModal";
+import ExportModal from "./components/ExportModal";
 import { t } from "./i18n";
 import useTasks from "./hooks/useTasks";
 import useDateNavigation from "./hooks/useDateNavigation";
@@ -29,6 +30,7 @@ export default function App() {
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
   const [glassEffect, setGlassEffect] = useState(false);
   const [showTrash, setShowTrash] = useState(false);
+  const [showExport, setShowExport] = useState(false);
 
   const COLLAPSED_HEIGHT = 40;
   const COLLAPSED_WIDTH = 240;
@@ -201,6 +203,7 @@ export default function App() {
         onToggleCollapse={handleToggleCollapse}
         trashCount={trash.length}
         onOpenTrash={() => { loadTrash(); setShowTrash(true); }}
+        onOpenExport={() => setShowExport(true)}
       />
       <DateBar
         dateStr={dateStr}
@@ -329,6 +332,13 @@ export default function App() {
           onClose={() => setShowTrash(false)}
           onRestore={restoreFromTrash}
           onEmpty={emptyTrash}
+        />
+      )}
+      {showExport && (
+        <ExportModal
+          lang={lang}
+          tasks={taskApi.tasks}
+          onClose={() => setShowExport(false)}
         />
       )}
     </>

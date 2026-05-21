@@ -9,6 +9,7 @@
 @import "./components/task-area.css";
 @import "./components/task-card.css";
 @import "./components/trash-modal.css";
+@import "./components/export-modal.css";
 @import "./components/empty-state.css";
 @import "./components/bottom-panel.css";
 @import "./components/toast.css";
