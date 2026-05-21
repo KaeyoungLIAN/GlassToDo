@@ -61,7 +61,7 @@ export default function WelcomeModal({ lang, onClose, showWelcome, onToggleWelco
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
             </svg>
-            <span>{lang === "zh" ? "删除与回收站 — 点垃圾桶删除，5秒内可撤销。进入回收站可恢复或清空，最多保留10条" : "Delete & trash — Click trash to delete, undo within 5s. Open trash to restore or empty, max 10 items"}</span>
+            <span>{lang === "zh" ? "删除与回收站 — 点垃圾桶删除，进入回收站可恢复或清空，最多保留10条" : "Delete & trash — Click trash to delete. Open trash in titlebar to restore or empty, max 10 items"}</span>
           </div>
           <div className="welcome-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
