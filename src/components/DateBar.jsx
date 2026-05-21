@@ -70,7 +70,7 @@ export default function DateBar({ dateStr, weekday, onPrev, onNext, onToday, onR
           </svg>
         </button>
         <div id="date-display-wrapper" ref={wrapperRef}>
-          <span id="date-display" onClick={() => setOpen((v) => !v)}>{dateStr}  {weekday}</span>
+          <button type="button" id="date-display" className="date-display-btn" onClick={() => setOpen((v) => !v)}>{dateStr}  {weekday}</button>
           {open && (
             <div className="datebar-popup">
               <div className="datebar-popup-header">

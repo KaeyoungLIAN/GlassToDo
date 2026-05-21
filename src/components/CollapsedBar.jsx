@@ -101,12 +101,12 @@ export default function CollapsedBar({ lang, alwaysOnTop, onTogglePin, onExpand,
         </div>
 
         {/* Remaining tasks — click to expand */}
-        <div className="collapse-bar-remaining" onClick={onExpand}>
+        <button type="button" className="collapse-bar-remaining" onClick={onExpand}>
           {lang === "zh"
             ? `剩余 ${remaining} 项`
             : `${remaining} remaining`
           }
-        </div>
+        </button>
       </div>
     </div>
   );

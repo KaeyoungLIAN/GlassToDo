@@ -3,7 +3,7 @@ import { t } from "../i18n";
 
 export default function WelcomeModal({ lang, onClose, showWelcome, onToggleWelcome }) {
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }} aria-label="Close">
       <div className="welcome-modal" onClick={(e) => e.stopPropagation()}>
         <div className="welcome-header">
           <span id="title-dot" style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: "var(--accent)", marginRight: 10 }} />
@@ -87,12 +87,12 @@ export default function WelcomeModal({ lang, onClose, showWelcome, onToggleWelco
         </div>
 
         <div className="welcome-footer">
-          <label className="welcome-toggle-row" onClick={onToggleWelcome}>
+          <div className="welcome-toggle-row" onClick={onToggleWelcome} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onToggleWelcome(); }}>
             <div className={`toggle-track${!showWelcome ? " on" : ""}`}>
               <div className="toggle-thumb" />
             </div>
             <span className="welcome-toggle-label">{lang === "zh" ? "不再显示" : "Don't show again"}</span>
-          </label>
+          </div>
           <button className="welcome-start-btn" onClick={onClose}>
             {lang === "zh" ? "开始使用" : "Get Started"}
           </button>

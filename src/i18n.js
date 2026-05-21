@@ -188,5 +188,5 @@ export function weekdayShort(lang) {
 export function availableLangs() {
   // zh first per user preference
   const order = ["zh", "en"];
-  return order.filter((code) => i18n[code]).map((code) => ({ code, name: LANG_NAMES[code] || code }));
+  return order.flatMap((code) => i18n[code] ? [{ code, name: LANG_NAMES[code] || code }] : []);
 }

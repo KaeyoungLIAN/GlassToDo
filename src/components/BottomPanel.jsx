@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useReducer, useRef, useEffect } from "react";
 import { t } from "../i18n";
 import ScheduledOptions from "./ScheduledOptions";
 
@@ -6,59 +6,75 @@ function fmt(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+const initialState = {
+  content: "",
+  rtype: "once",
+  onceDate: "",
+  onceTime: "14:30",
+  activeDays: new Set(),
+  weeklyTime: "09:00",
+  linkType: "url",
+  linkUrl: "",
+  meetingCode: "",
+  advanceMinutes: 0,
+  expanded: false,
+};
+
+function editReducer(state, action) {
+  switch (action.type) {
+    case "SET":
+      return { ...state, [action.field]: action.payload };
+    case "TOGGLE_DAY": {
+      const next = new Set(state.activeDays);
+      next.has(action.day) ? next.delete(action.day) : next.add(action.day);
+      return { ...state, activeDays: next };
+    }
+    case "LOAD_EDIT":
+      return { ...state, ...action.payload };
+    case "RESET":
+      return { ...initialState, onceDate: action.onceDate || state.onceDate };
+    default:
+      return state;
+  }
+}
+
 export default function BottomPanel({ editingId, editText, editRtype, editRdata, editLinkUrl, onSave, onCancelEdit, dateStr, lang, onEmptySubmit, showToast }) {
-  const [content, setContent] = useState("");
+  const [state, dispatch] = useReducer(editReducer, { ...initialState, onceDate: dateStr });
   const [taskMode, setTaskMode] = useState("normal");
-  const [rtype, setRtype] = useState("once");
-  const [onceDate, setOnceDate] = useState(dateStr);
-  const [onceTime, setOnceTime] = useState("14:30");
-  const [activeDays, setActiveDays] = useState(new Set());
-  const [weeklyTime, setWeeklyTime] = useState("09:00");
-  const [linkType, setLinkType] = useState("url");
-  const [linkUrl, setLinkUrl] = useState("");
-  const [meetingCode, setMeetingCode] = useState("");
-  const [advanceMinutes, setAdvanceMinutes] = useState(0);
-  const [expanded, setExpanded] = useState(false);
   const inputRef = useRef(null);
   const userSetOnceRef = useRef(false);
 
   // Auto-expand when editing
   useEffect(() => {
     if (editingId !== null) {
-      setContent(editText);
-      setTaskMode("scheduled");
-      setRtype(editRtype);
       const wxMatch = (editLinkUrl || "").match(/wemeet:\/\/page\/inmeeting\?meeting_code=([a-zA-Z0-9]+)/);
-      if (wxMatch) {
-        setLinkType("meeting");
-        setMeetingCode(wxMatch[1]);
-        setLinkUrl("");
-      } else {
-        setLinkType("url");
-        setLinkUrl(editLinkUrl || "");
-        setMeetingCode("");
-      }
+      const load = {
+        content: editText,
+        rtype: editRtype,
+        linkType: wxMatch ? "meeting" : "url",
+        meetingCode: wxMatch ? wxMatch[1] : "",
+        linkUrl: wxMatch ? "" : (editLinkUrl || ""),
+        expanded: true,
+      };
       if (editRtype === "once" && editRdata?.datetime) {
         const p = editRdata.datetime.split("T");
-        setOnceDate(p[0]);
-        setOnceTime(p[1]?.substring(0, 5) || "14:30");
+        load.onceDate = p[0];
+        load.onceTime = p[1]?.substring(0, 5) || "14:30";
       } else if (editRtype === "weekly") {
-        setActiveDays(new Set(editRdata?.days || []));
-        setWeeklyTime(editRdata?.time || "09:00");
+        load.activeDays = new Set(editRdata?.days || []);
+        load.weeklyTime = editRdata?.time || "09:00";
       }
-      setExpanded(true);
-      setTimeout(() => inputRef.current?.focus(), 350);
+      dispatch({ type: "LOAD_EDIT", payload: load });
+      setTaskMode("scheduled");
+      const id = setTimeout(() => inputRef.current?.focus(), 350);
+      return () => clearTimeout(id);
     }
   }, [editingId]);
 
-  useEffect(() => { if (!userSetOnceRef.current) setOnceDate(dateStr); }, [dateStr]);
+  useEffect(() => { if (!userSetOnceRef.current) dispatch({ type: "SET", field: "onceDate", payload: dateStr }); }, [dateStr]);
 
   const toggleDay = (d) => {
-    setActiveDays((prev) => {
-      const next = new Set(prev);
-      next.has(d) ? next.delete(d) : next.add(d);
-      return next;
-    });
+    dispatch({ type: "TOGGLE_DAY", day: d });
   };
 
   const isValidUrl = (url) => {
@@ -71,52 +87,47 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
   };
 
   const handleSubmit = () => {
-    const text = content.trim();
+    const text = state.content.trim();
     if (!text) {
       if (onEmptySubmit) onEmptySubmit();
       return;
     }
 
-    const rawUrl = linkType === "meeting" && meetingCode.trim()
-      ? `wemeet://page/inmeeting?meeting_code=${meetingCode.trim()}`
-      : linkType === "meeting" ? ""
-      : linkUrl;
+    const rawUrl = state.linkType === "meeting" && state.meetingCode.trim()
+      ? `wemeet://page/inmeeting?meeting_code=${state.meetingCode.trim()}`
+      : state.linkType === "meeting" ? ""
+      : state.linkUrl;
     if (rawUrl && !isValidUrl(rawUrl)) {
       showToast(t(lang, "invalidLink"));
       return;
     }
 
-    const finalLinkUrl = linkType === "meeting" && meetingCode.trim()
-      ? `wemeet://page/inmeeting?meeting_code=${meetingCode.trim()}`
-      : linkType === "meeting" ? ""
-      : linkUrl;
+    const finalLinkUrl = state.linkType === "meeting" && state.meetingCode.trim()
+      ? `wemeet://page/inmeeting?meeting_code=${state.meetingCode.trim()}`
+      : state.linkType === "meeting" ? ""
+      : state.linkUrl;
 
     if (editingId === null && taskMode === "normal") {
       const rd = { datetime: `${dateStr}T23:59:00`, days: [], time: "09:00" };
       onSave(text, "once", rd);
-      setContent("");
-      setLinkUrl("");
-      setMeetingCode("");
+      dispatch({ type: "SET", field: "content", payload: "" });
+      dispatch({ type: "SET", field: "linkUrl", payload: "" });
+      dispatch({ type: "SET", field: "meetingCode", payload: "" });
       inputRef.current?.focus();
       return;
     }
 
     const rd =
-      rtype === "once"
-        ? { datetime: `${onceDate || dateStr}T${onceTime}:00`, days: [], time: "09:00", advance_minutes: advanceMinutes }
-        : { datetime: null, days: activeDays.size ? [...activeDays] : [1], time: weeklyTime, advance_minutes: advanceMinutes };
-    onSave(text, rtype, rd, finalLinkUrl);
-    setContent("");
-    setLinkUrl("");
-    setMeetingCode("");
+      state.rtype === "once"
+        ? { datetime: `${state.onceDate || dateStr}T${state.onceTime}:00`, days: [], time: "09:00", advance_minutes: state.advanceMinutes }
+        : { datetime: null, days: state.activeDays.size ? [...state.activeDays] : [1], time: state.weeklyTime, advance_minutes: state.advanceMinutes };
+    onSave(text, state.rtype, rd, finalLinkUrl);
+    dispatch({ type: "SET", field: "content", payload: "" });
+    dispatch({ type: "SET", field: "linkUrl", payload: "" });
+    dispatch({ type: "SET", field: "meetingCode", payload: "" });
     if (editingId === null) {
-      setRtype("once");
-      setActiveDays(new Set());
-      setAdvanceMinutes(0);
-      setExpanded(false);
+      dispatch({ type: "RESET", onceDate: dateStr });
       setTaskMode("normal");
-      setOnceDate(dateStr);
-      setOnceTime("14:30");
       userSetOnceRef.current = false;
     }
     inputRef.current?.focus();
@@ -126,8 +137,8 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
 
   const switchMode = (mode) => {
     setTaskMode(mode);
-    if (mode === "scheduled" && !expanded) setExpanded(true);
-    if (mode === "normal") setExpanded(false);
+    if (mode === "scheduled" && !state.expanded) dispatch({ type: "SET", field: "expanded", payload: true });
+    if (mode === "normal") dispatch({ type: "SET", field: "expanded", payload: false });
     inputRef.current?.focus();
   };
 
@@ -139,8 +150,8 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
           type="text"
           id="task-input"
           placeholder={t(lang, "whatNeedsDone")}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+          value={state.content}
+          onChange={(e) => dispatch({ type: "SET", field: "content", payload: e.target.value })}
           onKeyDown={handleKey}
           autoComplete="off"
         />
@@ -180,24 +191,24 @@ export default function BottomPanel({ editingId, editText, editRtype, editRdata,
       <div id="reminder-collapse" className={taskMode === "scheduled" ? "open" : ""}>
         <ScheduledOptions
           lang={lang}
-          rtype={rtype}
-          onRtypeChange={setRtype}
-          onceDate={onceDate}
-          onOnceDateChange={(v) => { userSetOnceRef.current = true; setOnceDate(v); }}
-          onceTime={onceTime}
-          onOnceTimeChange={setOnceTime}
-          activeDays={activeDays}
+          rtype={state.rtype}
+          onRtypeChange={(v) => dispatch({ type: "SET", field: "rtype", payload: v })}
+          onceDate={state.onceDate}
+          onOnceDateChange={(v) => { userSetOnceRef.current = true; dispatch({ type: "SET", field: "onceDate", payload: v }); }}
+          onceTime={state.onceTime}
+          onOnceTimeChange={(v) => dispatch({ type: "SET", field: "onceTime", payload: v })}
+          activeDays={state.activeDays}
           onToggleDay={toggleDay}
-          weeklyTime={weeklyTime}
-          onWeeklyTimeChange={setWeeklyTime}
-          linkType={linkType}
-          onLinkTypeChange={setLinkType}
-          linkUrl={linkUrl}
-          onLinkUrlChange={setLinkUrl}
-          meetingCode={meetingCode}
-          onMeetingCodeChange={setMeetingCode}
-          advanceMin={advanceMinutes}
-          onAdvanceMinChange={setAdvanceMinutes}
+          weeklyTime={state.weeklyTime}
+          onWeeklyTimeChange={(v) => dispatch({ type: "SET", field: "weeklyTime", payload: v })}
+          linkType={state.linkType}
+          onLinkTypeChange={(v) => dispatch({ type: "SET", field: "linkType", payload: v })}
+          linkUrl={state.linkUrl}
+          onLinkUrlChange={(v) => dispatch({ type: "SET", field: "linkUrl", payload: v })}
+          meetingCode={state.meetingCode}
+          onMeetingCodeChange={(v) => dispatch({ type: "SET", field: "meetingCode", payload: v })}
+          advanceMin={state.advanceMinutes}
+          onAdvanceMinChange={(v) => dispatch({ type: "SET", field: "advanceMinutes", payload: v })}
         />
       </div>
     </div>
