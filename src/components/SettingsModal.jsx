@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { t, availableLangs } from "../i18n";
 
-export default function SettingsModal({ lang, theme, showCompleted, showWelcome, onClose, onSettingsChange }) {
+export default function SettingsModal({ lang, onClose, onSettingsChange }) {
   const [settings, setSettings] = useState({ language: lang, theme: "dark", data_dir: null, show_completed: true, show_welcome: true });
   const [loading, setLoading] = useState(true);
 

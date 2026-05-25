@@ -304,9 +304,6 @@ export default function App() {
       {showSettings && (
         <SettingsModal
           lang={lang}
-          theme={theme}
-          showCompleted={showCompleted}
-          showWelcome={showWelcome}
           onClose={() => setShowSettings(false)}
           onSettingsChange={handleSettingsChange}
         />

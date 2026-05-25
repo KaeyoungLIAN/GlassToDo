@@ -256,7 +256,10 @@ fn update_settings(app: AppHandle, state: State<'_, AppState>, settings: Setting
     let path = settings_path(&app);
     save_settings(&path, &settings)?;
     // Re-load tasks from potentially new data directory
-    modify_tasks(&state, &app, |_| {})?;
+    let _lock = state.file_mutex.lock().map_err(|e| e.to_string())?;
+    let (dp, data) = load_tasks_with_settings(&app);
+    save_tasks(&dp, &data)?;
+    *state.data.lock().map_err(|e| e.to_string())? = data.tasks;
     Ok(())
 }
 
@@ -319,7 +322,6 @@ fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
         completed_at: None,
     };
     data.next_id += 1;
-    let _task_id = task.id;
     data.tasks.push(task.clone());
     save_tasks(&path, &data)?;
     *state.data.lock().map_err(|e| e.to_string())? = data.tasks;
@@ -355,20 +357,17 @@ fn toggle_complete(state: State<'_, AppState>, app: AppHandle, id: u32, date: Op
     modify_tasks(&state, &app, |tasks| {
         if let Some(t) = tasks.iter_mut().find(|t| t.id == id) {
             if t.reminder_type == "weekly" {
-                let today = Local::now().format("%Y-%m-%d").to_string();
-                if let Some(pos) = t.completed_dates.iter().position(|d| d == &today) {
+                let cd = date.unwrap_or_else(|| Local::now().format("%Y-%m-%d").to_string());
+                if let Some(pos) = t.completed_dates.iter().position(|d| d == &cd) {
                     t.completed_dates.remove(pos);
                 } else {
-                    t.completed_dates.push(today.clone());
-                    t.last_reminded = Some(today);
+                    t.completed_dates.push(cd.clone());
+                    t.last_reminded = Some(cd);
                 }
             } else {
-                let completion_date = date.unwrap_or_else(|| Local::now().format("%Y-%m-%d").to_string());
-                if t.completed {
-                    t.completed_at = None;
-                } else {
-                    t.completed_at = Some(completion_date);
-                }
+                let cd = date.unwrap_or_else(|| Local::now().format("%Y-%m-%d").to_string());
+                if t.completed { t.completed_at = None; }
+                else { t.completed_at = Some(cd); }
                 t.completed = !t.completed;
             }
         }

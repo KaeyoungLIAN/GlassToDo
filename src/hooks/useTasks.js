@@ -120,6 +120,8 @@ export default function useTasks(lang) {
           setCompletingId(id);
           setTimeout(() => { loadTasks(); setCompletingId(null); }, 500);
         } else {
+          setCompletingId(id);
+          setTimeout(() => { setCompletingId(null); }, 300);
           await loadTasks();
         }
       } catch (e) { console.error("toggle_complete:", e); }
