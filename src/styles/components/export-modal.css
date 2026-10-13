@@ -1,25 +1,23 @@
 /* ── Export Modal ── */
 .export-modal {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  margin: auto;
   width: 480px;
   max-width: 90vw;
+  height: fit-content;
   max-height: 80vh;
-  background: #1a1a2e;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  background: var(--bg-modal);
+  backdrop-filter: blur(44px);
+  -webkit-backdrop-filter: blur(44px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   z-index: 1001;
-  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 0 var(--border-glass-inner), 0 16px 64px var(--shadow-color);
   overflow: hidden;
-}
-
-.theme-light .export-modal {
-  background: #f5f5f7;
-  border-color: rgba(0, 0, 0, 0.08);
+  animation: modal-in 300ms var(--ease-spring) both;
 }
 
 .export-modal-header {
@@ -27,44 +25,34 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.theme-light .export-modal-header {
-  border-color: rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--border-glass);
 }
 
 .export-modal-header h2 {
   font-size: 16px;
   font-weight: 600;
   margin: 0;
+  color: var(--text-primary);
 }
 
 .export-modal-close {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-tertiary);
   cursor: pointer;
   padding: 4px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
-  transition: color 150ms, background 150ms;
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
-.export-modal-close:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
-
-.theme-light .export-modal-close { color: rgba(0, 0, 0, 0.4); }
-.theme-light .export-modal-close:hover { color: #000; background: rgba(0, 0, 0, 0.06); }
+.export-modal-close:hover { color: var(--text-primary); background: var(--bg-glass-hover); }
 
 /* ── Date range picker ── */
 .export-modal-dates {
   display: flex;
   gap: 12px;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.theme-light .export-modal-dates {
-  border-color: rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid var(--border-glass-inner);
 }
 
 .export-date-field {
@@ -76,65 +64,72 @@
 
 .export-date-field label {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.45);
-  font-weight: 500;
+  color: var(--text-tertiary);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.theme-light .export-date-field label {
-  color: rgba(0, 0, 0, 0.45);
+  letter-spacing: 0.04em;
 }
 
 .export-date-field input {
   width: 100%;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
   padding: 6px 10px;
   font-size: 13px;
-  color: #fff;
+  color: var(--text-primary);
   outline: none;
   font-family: inherit;
-  transition: border-color 150ms;
+  transition: border-color var(--transition-fast);
 }
 .export-date-field input:focus {
-  border-color: #10b981;
+  border-color: rgba(16, 185, 129, 0.4);
 }
 .export-date-field input:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 .export-date-field input::-webkit-calendar-picker-indicator {
-  filter: invert(0.8);
   cursor: pointer;
-}
-
-.theme-light .export-date-field input {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #000;
-}
-.theme-light .export-date-field input:focus {
-  border-color: #10b981;
+  opacity: 0.6;
 }
 .theme-light .export-date-field input::-webkit-calendar-picker-indicator {
-  filter: none;
+  opacity: 0.6;
 }
+
+/* ── Preset shortcuts (this week / this month / shift) ── */
+.export-presets {
+  display: flex; align-items: center; gap: 6px;
+  width: 100%;
+}
+.export-preset {
+  padding: 5px 12px; background: var(--bg-input);
+  border: 1px solid var(--border-glass); border-radius: var(--radius-sm);
+  color: var(--text-secondary); font-size: 12px; font-weight: 500;
+  font-family: inherit; cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.export-preset:hover { background: var(--bg-glass-hover); color: var(--text-primary); transform: translateY(-1px) }
+.export-preset:active { transform: scale(0.96) translateY(0) }
+.export-preset.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(16, 185, 129, 0.35) }
+.export-preset-sep { flex: 1; height: 1px; background: var(--border-glass) }
+.export-shift {
+  width: 28px; height: 24px; display: flex; align-items: center; justify-content: center;
+  background: var(--bg-input); border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm); color: var(--text-tertiary); cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.export-shift:hover { background: var(--bg-glass-hover); color: var(--text-primary); transform: translateY(-1px) }
+.export-shift:active { transform: scale(0.92) translateY(0) }
 
 /* ── Summary ── */
 .export-summary {
   padding: 8px 20px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-tertiary);
   text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.theme-light .export-summary {
-  color: rgba(0, 0, 0, 0.45);
-  border-color: rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid var(--border-glass-inner);
 }
 
 /* ── Group list ── */
@@ -151,14 +146,10 @@
 .export-date-label {
   font-size: 11px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.04em;
   margin-bottom: 6px;
-}
-
-.theme-light .export-date-label {
-  color: rgba(0, 0, 0, 0.3);
 }
 
 .export-item {
@@ -170,29 +161,23 @@
 
 .export-item-check {
   flex-shrink: 0;
-  font-size: 12px;
+  color: var(--accent);
 }
 
 .export-item-text {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.theme-light .export-item-text {
-  color: rgba(0, 0, 0, 0.8);
-}
-
 .export-empty {
   padding: 48px 20px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.32);
+  color: var(--text-muted);
   font-size: 14px;
 }
-
-.theme-light .export-empty { color: rgba(0, 0, 0, 0.32); }
 
 /* ── Actions ── */
 .export-modal-actions {
@@ -200,27 +185,25 @@
   gap: 8px;
   justify-content: flex-end;
   padding: 12px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.theme-light .export-modal-actions {
-  border-color: rgba(0, 0, 0, 0.06);
+  border-top: 1px solid var(--border-glass);
 }
 
 .export-btn {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
-  border: none;
-  border-radius: 6px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-sm);
   padding: 7px 16px;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 150ms, transform 150ms;
+  transition: background var(--transition-fast), transform var(--transition-fast);
   font-family: inherit;
 }
-.export-btn:hover { background: rgba(16, 185, 129, 0.25); }
-.export-btn:active { transform: scale(0.95); }
+.theme-light .export-btn { border-color: rgba(5, 150, 105, 0.25) }
+.export-btn:hover { background: rgba(16, 185, 129, 0.22); transform: translateY(-1px); }
+.export-btn:active { transform: scale(0.96) translateY(0); }
+.export-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 /* ── Titlebar export button ── */
 #export-btn {

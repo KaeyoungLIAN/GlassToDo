@@ -169,9 +169,27 @@ export default function TitleBar({ onOpenSettings, showSearch, onToggleSearch, l
             </div>
             <div className="help-item">
               <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <span>{lang === "zh" ? "延期任务：过期未完成的任务折叠在列表顶部，带黄色标记，点击可展开/收起" : "Overdue: Past-due undone tasks fold above the list with a yellow mark, click to expand/collapse"}</span>
+            </div>
+            <div className="help-item">
+              <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3l3 6 7 1-5 4 2 7-7-4-7 4 2-7-5-4 7-1z" />
+              </svg>
+              <span>{lang === "zh" ? "优先级：创建/编辑任务时选高/中/低，卡片左侧用红/橙/蓝颜色条区分" : "Priority: Choose high/medium/low when creating, card shows a red/orange/blue accent bar"}</span>
+            </div>
+            <div className="help-item">
+              <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+              <span>{lang === "zh" ? "备注：点输入栏的笔记按钮展开备注框，卡片上会显示备注预览" : "Notes: Click the note button in the input bar to add a note, shown as a preview on the card"}</span>
+            </div>
+            <div className="help-item">
+              <svg className="help-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              <span>{lang === "zh" ? "导出完成记录：下载图标→选日期范围→按日分组展示已完成任务，支持复制文本或保存文件" : "Export: Download icon → pick date range → grouped by day, copy or save as file"}</span>
+              <span>{lang === "zh" ? "导出完成记录：点下载图标，支持「本周」「本月」快捷选择，并可按周/月前后滚动，复制文本或保存文件" : "Export: Click download icon, with This week / This month presets and week/month paging, copy or save as file"}</span>
             </div>
           </div>
           <div className="help-popover-footer">

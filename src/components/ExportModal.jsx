@@ -2,16 +2,48 @@ import React, { useState, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { t } from "../i18n";
 
+function pad(n) { return String(n).padStart(2, "0"); }
+function fmt(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+
 function defaultRange() {
   const end = new Date();
   const start = new Date();
   start.setDate(start.getDate() - 30);
-  return [start.toISOString().slice(0, 10), end.toISOString().slice(0, 10)];
+  return [fmt(start), fmt(end)];
+}
+
+// Start of week (Monday) and end of week (Sunday)
+function weekRange(base) {
+  const d = new Date(base);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day; // to Monday
+  const start = new Date(d.getFullYear(), d.getMonth(), d.getDate() + diff);
+  const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+  return [fmt(start), fmt(end)];
+}
+
+function monthRange(base) {
+  const start = new Date(base.getFullYear(), base.getMonth(), 1);
+  const end = new Date(base.getFullYear(), base.getMonth() + 1, 0);
+  return [fmt(start), fmt(end)];
+}
+
+// Shift a date range by +dir in units of "week" or "month"
+function shiftRange(start, end, unit, dir) {
+  const s = new Date(start);
+  const e = new Date(end);
+  if (unit === "month") {
+    return monthRange(new Date(s.getFullYear(), s.getMonth() + dir, 1));
+  }
+  s.setDate(s.getDate() + dir * 7);
+  e.setDate(e.getDate() + dir * 7);
+  return [fmt(s), fmt(e)];
 }
 
 export default function ExportModal({ lang, tasks, onClose, showToast }) {
   const [startDate, setStartDate] = useState(() => defaultRange()[0]);
   const [endDate, setEndDate] = useState(() => defaultRange()[1]);
+  const [period, setPeriod] = useState("custom"); // 'week' | 'month' | 'custom'
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -65,8 +97,8 @@ export default function ExportModal({ lang, tasks, onClose, showToast }) {
       ? ["日","一","二","三","四","五","六"]
       : ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
     const lines = [
-      `${lang === "zh" ? "📋 完成记录" : "📋 Completion Record"}`,
-      `📅 ${startDate} ~ ${endDate}`,
+      `${lang === "zh" ? "完成记录" : "Completion Record"}`,
+      `${startDate} ~ ${endDate}`,
       `${lang === "zh" ? `共计 ${totalCount} 项` : `${totalCount} items`}`,
       `━━━━━━━━━━━━━━━━━━━━━━━━`,
     ];
@@ -74,11 +106,11 @@ export default function ExportModal({ lang, tasks, onClose, showToast }) {
       lines.push(``);
       const d = new Date(g.date);
       const label = lang === "zh"
-        ? `📌 ${g.date} (周${dayNames[d.getDay()]}) — ${g.items.length} 项`
-        : `📌 ${g.date} (${dayNames[d.getDay()]}) — ${g.items.length} items`;
+        ? `${g.date} (周${dayNames[d.getDay()]}) — ${g.items.length} 项`
+        : `${g.date} (${dayNames[d.getDay()]}) — ${g.items.length} items`;
       lines.push(label);
       g.items.forEach((item) => {
-        lines.push(`  ✅ ${item.content}`);
+        lines.push(`  [x] ${item.content}`);
       });
     });
     if (groups.length === 0) {
@@ -119,6 +151,33 @@ export default function ExportModal({ lang, tasks, onClose, showToast }) {
     }
   };
 
+  const applyWeek = () => {
+    const [s, e] = weekRange(new Date());
+    setStartDate(s);
+    setEndDate(e);
+    setPeriod("week");
+  };
+  const applyMonth = () => {
+    const [s, e] = monthRange(new Date());
+    setStartDate(s);
+    setEndDate(e);
+    setPeriod("month");
+  };
+  const shiftPrev = () => {
+    const unit = period === "month" ? "month" : "week";
+    const [s, e] = shiftRange(startDate, endDate, unit, -1);
+    setStartDate(s);
+    setEndDate(e);
+    setPeriod(unit);
+  };
+  const shiftNext = () => {
+    const unit = period === "month" ? "month" : "week";
+    const [s, e] = shiftRange(startDate, endDate, unit, 1);
+    setStartDate(s);
+    setEndDate(e);
+    setPeriod(unit);
+  };
+
   return (
     <>
       <div className="modal-overlay" onClick={onClose} />
@@ -133,13 +192,55 @@ export default function ExportModal({ lang, tasks, onClose, showToast }) {
         </div>
 
         <div className="export-modal-dates">
+          <div className="export-presets">
+            <button
+              className={"export-preset" + (period === "week" ? " active" : "")}
+              onClick={applyWeek}
+            >
+              {t(lang, "thisWeekRange")}
+            </button>
+            <button
+              className={"export-preset" + (period === "month" ? " active" : "")}
+              onClick={applyMonth}
+            >
+              {t(lang, "thisMonthRange")}
+            </button>
+            <button
+              className={"export-preset" + (period === "custom" ? " active" : "")}
+              onClick={() => setPeriod("custom")}
+            >
+              {t(lang, "customRange")}
+            </button>
+            <span className="export-preset-sep" />
+            <button
+              className="export-shift"
+              onClick={shiftPrev}
+              title={t(lang, "prevPeriod")}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <button
+              className="export-shift"
+              onClick={shiftNext}
+              title={t(lang, "nextPeriod")}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="export-modal-dates">
           <div className="export-date-field">
             <label>{t(lang, "startDate")}</label>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPeriod("custom"); }} />
           </div>
           <div className="export-date-field">
             <label>{t(lang, "endDate")}</label>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            <input type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPeriod("custom"); }} />
           </div>
         </div>
 
@@ -164,7 +265,9 @@ export default function ExportModal({ lang, tasks, onClose, showToast }) {
                   <div className="export-date-label">{label}</div>
                   {g.items.map((item) => (
                     <div key={`${g.date}-${item.id}`} className="export-item">
-                      <span className="export-item-check">✅</span>
+                      <svg className="export-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" /><polyline points="8 12 11 15 16 9" />
+                      </svg>
                       <span className="export-item-text">{item.content}</span>
                     </div>
                   ))}

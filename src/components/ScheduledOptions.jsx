@@ -40,7 +40,7 @@ export default function ScheduledOptions({
   };
 
   return (
-    <div id="reminder-inner">
+    <div className="scheduled-options">
       <div id="scheduled-row">
         <div className="segmented">
           <button

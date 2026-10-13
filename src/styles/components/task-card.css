@@ -53,6 +53,16 @@
 .reminder-badge.once { background: rgba(16, 185, 129, 0.12); color: #6ee7b7 }
 .reminder-badge.weekly { background: rgba(16, 185, 129, 0.08); color: #34d399 }
 .reminder-badge.pinned { background: rgba(16, 185, 129, 0.1); color: var(--accent); font-size: 10px }
+.reminder-badge.note { background: var(--bg-input); color: var(--text-tertiary) }
+.reminder-badge.note .note-preview {
+  max-width: 120px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; font-weight: 400;
+}
+
+/* ── Priority left accent bar ── */
+.task-card.priority-high { border-left: 3px solid #ef4444 }
+.task-card.priority-medium { border-left: 3px solid #3b82f6 }
+.task-card.priority-low { border-left: 3px solid #94a3b8 }
 
 /* ── Action Buttons ── */
 .action-btn {

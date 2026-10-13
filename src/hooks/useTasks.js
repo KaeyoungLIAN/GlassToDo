@@ -9,6 +9,8 @@ export default function useTasks(lang) {
   const [editRtype, setEditRtype] = useState("once");
   const [editRdata, setEditRdata] = useState(null);
   const [editLinkUrl, setEditLinkUrl] = useState("");
+  const [editPriority, setEditPriority] = useState("medium");
+  const [editNotes, setEditNotes] = useState("");
   const [toast, setToast] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [completingId, setCompletingId] = useState(null);
@@ -28,8 +30,8 @@ export default function useTasks(lang) {
       if (alerts && alerts.length > 0) {
         // In-app toast fallback — shows even if system notification denied
         const msg = alerts.length <= 3
-          ? `🔔 ${alerts.join(", ")}`
-          : `🔔 ${alerts.length} ${t(lang, "reminders")}`;
+          ? alerts.join(", ")
+          : `${alerts.length} ${t(lang, "reminders")}`;
         setToast(msg);
         setTimeout(() => setToast(null), 4000);
         // Refresh after notification updates last_reminded
@@ -47,20 +49,20 @@ export default function useTasks(lang) {
   }, []);
 
   const addTask = useCallback(
-    async (content, rtype, rdata, linkUrl) => {
+    async (content, rtype, rdata, linkUrl, priority, notes) => {
       if (submitLockRef.current) return;
       submitLockRef.current = true;
       try {
         if (editingId !== null) {
           const original = tasks.find((x) => x.id === editingId);
           if (original) {
-            const task = { ...original, content, reminder_type: rtype, reminder_data: rdata, link_url: linkUrl || null };
+            const task = { ...original, content, reminder_type: rtype, reminder_data: rdata, link_url: linkUrl || null, priority: priority || "medium", notes: notes || "" };
             await invoke("update_task", { task });
           }
           setEditingId(null);
           showToast(t(lang, "taskUpdated"));
         } else {
-          await invoke("add_task", { content, reminderType: rtype, reminderData: rdata, linkUrl: linkUrl || null });
+          await invoke("add_task", { content, reminderType: rtype, reminderData: rdata, linkUrl: linkUrl || null, priority: priority || "medium", notes: notes || "" });
           showToast(t(lang, "taskAdded"));
         }
         await loadTasks();
@@ -135,6 +137,8 @@ export default function useTasks(lang) {
     setEditRtype(t.reminder_type);
     setEditRdata(t.reminder_data);
     setEditLinkUrl(t.link_url || "");
+    setEditPriority(t.priority || "medium");
+    setEditNotes(t.notes || "");
   }, []);
 
   const cancelEdit = useCallback(() => {
@@ -181,7 +185,7 @@ export default function useTasks(lang) {
     tasks, setTasks, loadTasks,
     addTask, deleteTask, toggleComplete,
     startEdit, cancelEdit, togglePin, togglePersist, handleReorder,
-    editingId, editText, editRtype, editRdata, editLinkUrl,
+    editingId, editText, editRtype, editRdata, editLinkUrl, editPriority, editNotes,
     deletingId, completingId,
     trash, loadTrash, restoreFromTrash, emptyTrash,
     toast, showToast, setToast,

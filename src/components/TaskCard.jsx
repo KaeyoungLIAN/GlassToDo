@@ -19,7 +19,7 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
   const todayStr = new Date().toISOString().slice(0, 10);
   return (
     <div
-      className={"task-card" + (completed ? " completed" : "") + (isDeleting ? " deleting" : "") + (isCompleting ? " completing" : "")}
+      className={"task-card" + (completed ? " completed" : "") + (isDeleting ? " deleting" : "") + (isCompleting ? " completing" : "") + " priority-" + (task.priority || "medium")}
       style={{ animationDelay: `${index * 40}ms` }}
     >
       <div className="reorder-btns">
@@ -57,6 +57,15 @@ export default function TaskCard({ task, index, onToggle, onDelete, onEdit, onPi
         <div className="task-meta">
           {task.pinned && (
             <span className="reminder-badge pinned">{t(lang, "pinned")}</span>
+          )}
+          {task.notes && (
+            <span className="reminder-badge note" title={task.notes}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <span className="note-preview">{task.notes}</span>
+            </span>
           )}
           {completed ? (
             <span className="reminder-badge once">{t(lang, "done")}</span>

@@ -34,7 +34,13 @@ pub struct TaskItem {
     pub link_url: Option<String>,
     #[serde(default)]
     pub completed_at: Option<String>,
+    #[serde(default = "default_priority")]
+    pub priority: String,
+    #[serde(default)]
+    pub notes: String,
 }
+
+fn default_priority() -> String { "medium".to_string() }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct TodoData {
@@ -309,7 +315,7 @@ fn get_tasks(state: State<'_, AppState>, _app: AppHandle) -> Result<Vec<TaskItem
 #[tauri::command]
 fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
     reminder_type: String, reminder_data: ReminderData,
-    link_url: Option<String>) -> Result<TaskItem, String> {
+    link_url: Option<String>, priority: Option<String>, notes: Option<String>) -> Result<TaskItem, String> {
     let (path, mut data) = load_tasks_with_settings(&app);
     let position = data.tasks.len() as u32;
     let task = TaskItem {
@@ -320,6 +326,8 @@ fn add_task(state: State<'_, AppState>, app: AppHandle, content: String,
         completed_dates: Vec::new(),
         link_url,
         completed_at: None,
+        priority: priority.unwrap_or_else(default_priority),
+        notes: notes.unwrap_or_default(),
     };
     data.next_id += 1;
     data.tasks.push(task.clone());

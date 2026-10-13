@@ -18,6 +18,9 @@ import useSearch from "./hooks/useSearch";
 
 const WN = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
+const PRIORITY_RANK = { high: 0, medium: 1, low: 2 };
+const rankPriority = (t) => PRIORITY_RANK[t.priority] ?? 1;
+
 export default function App() {
   // ── Settings state ──
   const [lang, setLang] = useState("en");
@@ -39,7 +42,7 @@ export default function App() {
   const {
     loadTasks, addTask, deleteTask, toggleComplete,
     startEdit, cancelEdit, togglePin, togglePersist, handleReorder,
-    editingId, editText, editRtype, editRdata, editLinkUrl,
+    editingId, editText, editRtype, editRdata, editLinkUrl, editPriority, editNotes,
     deletingId, completingId,
     trash, loadTrash, restoreFromTrash, emptyTrash, toast, showToast,
   } = taskApi;
@@ -96,10 +99,31 @@ export default function App() {
     invoke("set_glass_effect", { enabled: glassEffect }).catch(() => {});
   }, [glassEffect]);
 
+  // ── Overdue / deferred tasks ──
+  const overdue = useMemo(() => {
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    return taskApi.tasks.filter((t) => {
+      if (t.completed) return false;
+      if (t.persist) return false; // persist tasks are not "overdue"
+      if (t.reminder_type === "weekly") return false; // weekly repeats, not "overdue"
+      return !!t.reminder_data?.datetime && t.reminder_data.datetime.slice(0, 10) < todayStr;
+    })
+    .sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      const pr = rankPriority(a) - rankPriority(b);
+      if (pr !== 0) return pr;
+      return a.position - b.position;
+    });
+  }, [taskApi.tasks]);
+
+  const overdueIds = useMemo(() => new Set(overdue.map((t) => t.id)), [overdue]);
+
   // ── Filtered tasks ──
   const filtered = useMemo(() => taskApi.tasks
     .filter((t) => {
       if (completingId === t.id) return true;
+      if (overdueIds.has(t.id)) return false; // shown in overdue section instead
       if (!showCompleted && (t.completed || t.completed_dates?.includes(dateStr))) return false;
       const q = searchQuery.toLowerCase().trim();
       if (q && !t.content.toLowerCase().includes(q)) return false;
@@ -109,8 +133,10 @@ export default function App() {
     })
     .sort((a, b) => {
       if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      const pr = rankPriority(a) - rankPriority(b);
+      if (pr !== 0) return pr;
       return a.position - b.position;
-    }), [taskApi.tasks, showCompleted, dateStr, currentDate, completingId, searchQuery]);
+    }), [taskApi.tasks, showCompleted, dateStr, currentDate, completingId, searchQuery, overdueIds]);
 
   // ── Handlers ──
   const handleSettingsChange = useCallback((newLang, _dataDir, showComp, newTheme, showWelcomeVal, newGlass) => {
@@ -273,6 +299,7 @@ export default function App() {
       ) : (
         <TaskList
           tasks={filtered}
+          overdue={overdue}
           dateStr={dateStr}
           onToggle={(id) => toggleComplete(id, showCompleted, dateStr)}
           onDelete={deleteTask}
@@ -291,6 +318,8 @@ export default function App() {
         editRtype={editRtype}
         editRdata={editRdata}
         editLinkUrl={editLinkUrl}
+        editPriority={editPriority}
+        editNotes={editNotes}
         onSave={addTask}
         onCancelEdit={cancelEdit}
         dateStr={dateStr}

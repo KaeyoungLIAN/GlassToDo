@@ -1,13 +1,27 @@
 import { useState, useMemo, useCallback } from "react";
 
-function taskDate(t) {
-  if (t.reminder_data?.datetime && t.reminder_data.datetime.length >= 10)
-    return t.reminder_data.datetime.slice(0, 10);
-  return t.created_at.slice(0, 10);
-}
-
 function fmt(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/**
+ * Return the single most accurate completion date for a task.
+ * Weekly tasks record every occurrence in completed_dates[]; one-off and
+ * persisted tasks record the moment of completion in completed_at.
+ */
+function completedDates(t) {
+  const dates = [];
+  if (t.completed_dates && t.completed_dates.length) {
+    dates.push(...t.completed_dates);
+  }
+  if (t.completed && t.completed_at) {
+    dates.push(t.completed_at);
+  }
+  // Backward compatibility: legacy tasks may only carry `completed` + a due date.
+  if (t.completed && !t.completed_at && t.reminder_data?.datetime) {
+    dates.push(t.reminder_data.datetime.slice(0, 10));
+  }
+  return dates;
 }
 
 export default function useDateNavigation(tasks) {
@@ -15,6 +29,7 @@ export default function useDateNavigation(tasks) {
 
   const dateStr = fmt(currentDate);
   const today = new Date();
+  const todayStr = fmt(today);
   const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
   const yesterdayStr = fmt(yesterday);
 
@@ -23,19 +38,16 @@ export default function useDateNavigation(tasks) {
   weekStart.setDate(weekStart.getDate() - (day === 0 ? 6 : day - 1));
   const weekStartStr = fmt(weekStart);
 
-  const isTaskCompletedOn = (t, d) => t.completed_dates?.includes(d);
-
   const yesterdayCompleted = useMemo(
-    () => tasks.filter((t) => isTaskCompletedOn(t, yesterdayStr)).length,
+    () => tasks.filter((t) => completedDates(t).includes(yesterdayStr)).length,
     [tasks, yesterdayStr]
   );
 
-  const weekCompleted = useMemo(() =>
-    tasks.filter((t) => {
-      if (t.completed_dates?.some((d) => d >= weekStartStr && d <= dateStr)) return true;
-      return t.completed && taskDate(t) >= weekStartStr && taskDate(t) <= dateStr;
-    }).length,
-    [tasks, weekStartStr, dateStr]
+  const weekCompleted = useMemo(
+    () => tasks.filter((t) =>
+      completedDates(t).some((d) => d >= weekStartStr && d <= todayStr)
+    ).length,
+    [tasks, weekStartStr, todayStr]
   );
 
   const goPrev = useCallback(() => setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1)), []);

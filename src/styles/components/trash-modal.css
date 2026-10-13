@@ -6,7 +6,7 @@
   min-width: 14px;
   height: 14px;
   border-radius: 7px;
-  background: #ef4444;
+  background: var(--danger);
   color: #fff;
   font-size: 9px;
   font-weight: 700;
@@ -23,25 +23,23 @@
 /* ── Trash Modal Overlay ── */
 .trash-modal {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  margin: auto;
   width: 400px;
   max-width: 90vw;
+  height: fit-content;
   max-height: 80vh;
-  background: #1a1a2e;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  background: var(--bg-modal);
+  backdrop-filter: blur(44px);
+  -webkit-backdrop-filter: blur(44px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   z-index: 1001;
-  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 0 var(--border-glass-inner), 0 16px 64px var(--shadow-color);
   overflow: hidden;
-}
-
-.theme-light .trash-modal {
-  background: #f5f5f7;
-  border-color: rgba(0, 0, 0, 0.08);
+  animation: modal-in 300ms var(--ease-spring) both;
 }
 
 .trash-modal-header {
@@ -49,33 +47,27 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.theme-light .trash-modal-header {
-  border-color: rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--border-glass);
 }
 
 .trash-modal-header h2 {
   font-size: 16px;
   font-weight: 600;
   margin: 0;
+  color: var(--text-primary);
 }
 
 .trash-close-btn {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-tertiary);
   cursor: pointer;
   padding: 4px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
-  transition: color 150ms, background 150ms;
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
-.trash-close-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
-
-.theme-light .trash-close-btn { color: rgba(0, 0, 0, 0.4); }
-.theme-light .trash-close-btn:hover { color: #000; background: rgba(0, 0, 0, 0.06); }
+.trash-close-btn:hover { color: var(--text-primary); background: var(--bg-glass-hover); }
 
 /* ── Trash List ── */
 .trash-list {
@@ -87,24 +79,19 @@
 .trash-empty {
   padding: 48px 20px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.32);
+  color: var(--text-muted);
   font-size: 14px;
 }
-
-.theme-light .trash-empty { color: rgba(0, 0, 0, 0.32); }
 
 .trash-item {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  transition: background 150ms;
+  border-bottom: 1px solid var(--border-glass-inner);
+  transition: background var(--transition-fast);
 }
-.trash-item:hover { background: rgba(255, 255, 255, 0.03); }
-
-.theme-light .trash-item { border-color: rgba(0, 0, 0, 0.04); }
-.theme-light .trash-item:hover { background: rgba(0, 0, 0, 0.02); }
+.trash-item:hover { background: var(--bg-glass-hover); }
 
 .trash-item-content {
   flex: 1;
@@ -114,6 +101,7 @@
 .trash-item-text {
   font-size: 14px;
   font-weight: 500;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -124,48 +112,52 @@
   gap: 8px;
   margin-top: 2px;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--text-tertiary);
 }
 
-.theme-light .trash-item-meta { color: rgba(0, 0, 0, 0.35); }
+.trash-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.trash-meta-item svg { flex-shrink: 0; opacity: 0.7; }
 
 .trash-restore-btn {
   flex-shrink: 0;
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
-  border: none;
-  border-radius: 6px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-sm);
   padding: 5px 12px;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 150ms, transform 150ms;
+  transition: background var(--transition-fast), transform var(--transition-fast);
   font-family: inherit;
 }
-.trash-restore-btn:hover { background: rgba(16, 185, 129, 0.25); }
-.trash-restore-btn:active { transform: scale(0.95); }
+.theme-light .trash-restore-btn { border-color: rgba(5, 150, 105, 0.25) }
+.trash-restore-btn:hover { background: rgba(16, 185, 129, 0.22); transform: translateY(-1px); }
+.trash-restore-btn:active { transform: scale(0.96) translateY(0); }
 
 /* ── Trash Actions ── */
 .trash-actions {
   padding: 12px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--border-glass);
   display: flex;
   justify-content: flex-end;
 }
 
-.theme-light .trash-actions { border-color: rgba(0, 0, 0, 0.06); }
-
 .trash-empty-all-btn {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
-  border: none;
-  border-radius: 6px;
+  background: var(--danger-dim);
+  color: var(--danger);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
   padding: 6px 16px;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 150ms, transform 150ms;
+  transition: background var(--transition-fast), transform var(--transition-fast);
   font-family: inherit;
 }
-.trash-empty-all-btn:hover { background: rgba(239, 68, 68, 0.2); }
-.trash-empty-all-btn:active { transform: scale(0.95); }
+.trash-empty-all-btn:hover { background: rgba(239, 68, 68, 0.2); transform: translateY(-1px); }
+.trash-empty-all-btn:active { transform: scale(0.96) translateY(0); }
