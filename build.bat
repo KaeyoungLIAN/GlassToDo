@@ -1,9 +1,9 @@
-@echo off
+﻿@echo off
 chcp 65001 >nul
 title GlassTodo 构建工具
 
 echo ============================================
-echo   GlassTodo v2.0 (Tauri)
+echo   GlassTodo v1.0 (Tauri)
 echo   构建单文件 exe，双击即用，无需任何运行库
 echo ============================================
 echo.
@@ -44,10 +44,10 @@ echo   构建完成！
 echo ============================================
 echo.
 echo 绿色 exe（双击即用）：
-echo   src-tauri\target\release\GlassTodo.exe
+echo   src-tauri\target\release\glass-todo.exe
 echo.
-echo MSI 安装包：
-echo   src-tauri\target\release\bundle\msi\GlassTodo_2.0.0_x64.msi
+echo NSIS 安装包：
+echo   src-tauri\target\release\bundle\nsis\GlassTodo_1.0.0_x64-setup.exe
 echo.
 echo   ⚡ 文件大小约 5MB，无需任何运行库
 echo.
